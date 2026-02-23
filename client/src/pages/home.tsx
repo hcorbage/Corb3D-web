@@ -84,7 +84,7 @@ function HeroSection() {
     >
       <div className="absolute inset-0">
         <img
-          src="/images/hero-bg.png"
+          src="/images/hero-bg-v2.png"
           alt=""
           className="w-full h-full object-cover"
           data-testid="img-hero-bg"
@@ -105,14 +105,14 @@ function HeroSection() {
           className="space-y-8"
         >
           <motion.div variants={fadeInUp} custom={0}>
-            <div className="flex items-center justify-center gap-5">
+            <div className="flex flex-col items-center gap-4">
               <img
                 src="/images/corb3d-icon-v3.png"
                 alt="Corb3D Icon"
-                className="h-20 md:h-28 object-contain drop-shadow-2xl"
+                className="h-32 md:h-44 object-contain drop-shadow-2xl"
                 data-testid="img-hero-icon"
               />
-              <span className="text-6xl md:text-8xl font-bold tracking-tight text-white drop-shadow-2xl" data-testid="img-hero-logo">
+              <span className="text-4xl md:text-5xl font-bold tracking-widest text-white drop-shadow-2xl" data-testid="img-hero-logo">
                 CORB<span className={CYAN_CLASS}>3D</span>
               </span>
             </div>
