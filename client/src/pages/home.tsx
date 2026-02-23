@@ -318,23 +318,23 @@ function ServicesSection() {
                   {service.description}
                 </p>
                 {service.link && (
-                  <div className="mt-4 flex items-center gap-1.5">
+                  <a
+                    href={service.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center gap-1.5 no-underline hover:gap-3 transition-all duration-300"
+                    data-testid={`link-service-${i}`}
+                  >
                     <span className={`text-sm font-medium ${CYAN_CLASS}`}>Acessar</span>
                     <ArrowRight className={`w-4 h-4 ${CYAN_CLASS}`} />
-                  </div>
+                  </a>
                 )}
               </Card>
             );
 
             return (
               <motion.div key={service.title} variants={fadeInUp} custom={i}>
-                {service.link ? (
-                  <a href={service.link} className="block h-full no-underline" data-testid={`link-service-${i}`}>
-                    {cardContent}
-                  </a>
-                ) : (
-                  cardContent
-                )}
+                {cardContent}
               </motion.div>
             );
           })}
