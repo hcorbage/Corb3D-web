@@ -243,7 +243,7 @@ function ServicesSection() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={staggerContainer}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {services.map((service, i) => (
             <motion.div key={service.title} variants={fadeInUp} custom={i}>
