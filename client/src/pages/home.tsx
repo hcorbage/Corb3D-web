@@ -194,6 +194,7 @@ function ServicesSection() {
       title: "Impressao em Resina",
       description:
         "Acabamento ultra fino com resina SLA/DLP. Perfeito para modelos detalhados, joalheria e aplicacoes dentarias.",
+      comingSoon: true,
     },
     {
       icon: Box,
@@ -241,9 +242,14 @@ function ServicesSection() {
           {services.map((service, i) => (
             <motion.div key={service.title} variants={fadeInUp} custom={i}>
               <Card
-                className="bg-white/[0.03] border-white/[0.06] p-6 h-full hover-elevate"
+                className={`bg-white/[0.03] border-white/[0.06] p-6 h-full hover-elevate relative ${service.comingSoon ? "opacity-70" : ""}`}
                 data-testid={`card-service-${i}`}
               >
+                {service.comingSoon && (
+                  <span className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-widest bg-[hsl(192,85%,48%)]/15 text-[hsl(192,85%,50%)] px-2.5 py-1 rounded-full border border-[hsl(192,85%,48%)]/20" data-testid={`badge-coming-soon-${i}`}>
+                    Em Breve
+                  </span>
+                )}
                 <div className="w-12 h-12 rounded-md bg-[hsl(192,85%,48%)]/10 flex items-center justify-center mb-5">
                   <service.icon className={`w-6 h-6 ${CYAN_CLASS}`} />
                 </div>
