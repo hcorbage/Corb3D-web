@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock } from "lucide-react";
+import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
@@ -201,6 +201,12 @@ function ServicesSection() {
       title: "Modelagem 3D",
       description:
         "Criamos ou adaptamos seu modelo 3D para garantir a melhor qualidade de impressao e otimizacao de material.",
+    },
+    {
+      icon: ScanLine,
+      title: "Escaneamento 3D",
+      description:
+        "Digitalizacao precisa de objetos fisicos para criacao de modelos 3D. Ideal para engenharia reversa e replicacao de pecas.",
     },
     {
       icon: Settings,
