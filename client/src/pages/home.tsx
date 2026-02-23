@@ -257,9 +257,9 @@ function ServicesSection() {
     },
     {
       icon: Calculator,
-      title: "Calculadora",
+      title: "Calculadora 3D",
       description:
-        "Calcule o custo estimado da sua impressao 3D de forma rapida e simples.",
+        "Sistema completo para profissionais e empresas de impressao 3D. Controle de impressoes, calculo de custos, orcamentos e gestao do seu negocio.",
       link: "#",
     },
   ];
