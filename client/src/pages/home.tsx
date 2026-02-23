@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine, Calculator } from "lucide-react";
+import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine, Calculator, Mail, MessageCircle, Send, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 
 const CYAN = "hsl(192 85% 50%)";
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
@@ -42,6 +43,21 @@ const staggerContainer = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.12 } },
 };
+
+function PortfolioLink() {
+  const [, setLocation] = useLocation();
+  return (
+    <Button
+      variant="outline"
+      size="lg"
+      className="border-white/20 text-white bg-white/5 backdrop-blur-sm font-semibold text-base px-8"
+      data-testid="button-portfolio"
+      onClick={() => setLocation("/portfolio")}
+    >
+      Ver Portfolio
+    </Button>
+  );
+}
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -90,9 +106,11 @@ function Navbar() {
             Contato
           </a>
         </div>
-        <Button variant="default" size="sm" data-testid="button-orcamento-nav">
-          Solicitar Orcamento
-        </Button>
+        <a href="#contato">
+          <Button variant="default" size="sm" data-testid="button-orcamento-nav">
+            Solicitar Orcamento
+          </Button>
+        </a>
       </div>
     </motion.nav>
   );
@@ -172,22 +190,17 @@ function HeroSection() {
             custom={2}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button
-              size="lg"
-              className="font-bold text-base px-8"
-              data-testid="button-orcamento-hero"
-            >
-              Solicitar Orcamento
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white/20 text-white bg-white/5 backdrop-blur-sm font-semibold text-base px-8"
-              data-testid="button-portfolio"
-            >
-              Ver Portfolio
-            </Button>
+            <a href="#contato">
+              <Button
+                size="lg"
+                className="font-bold text-base px-8"
+                data-testid="button-orcamento-hero"
+              >
+                Solicitar Orcamento
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </a>
+            <PortfolioLink />
           </motion.div>
 
           <motion.div
@@ -489,53 +502,195 @@ function DifferentialsSection() {
 }
 
 function CTASection() {
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", service: "", message: "" });
+  const [sent, setSent] = useState(false);
+
+  const WHATSAPP_NUMBER = "5500000000000";
+  const CONTACT_EMAIL = "contato@corb3d.com";
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = encodeURIComponent(`Orcamento Corb3D - ${formData.service || "Geral"}`);
+    const body = encodeURIComponent(
+      `Nome: ${formData.name}\nE-mail: ${formData.email}\nTelefone: ${formData.phone}\nServico: ${formData.service}\n\nMensagem:\n${formData.message}`
+    );
+    window.open(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`, "_blank");
+    setSent(true);
+    setTimeout(() => setSent(false), 4000);
+  };
+
+  const openWhatsApp = () => {
+    const text = encodeURIComponent("Ola! Gostaria de solicitar um orcamento para impressao 3D.");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, "_blank");
+  };
+
   return (
-    <section id="contato" className="py-24 bg-[#080c14]" data-testid="section-contato">
-      <div className="max-w-4xl mx-auto px-6">
+    <section id="contato" className="py-24 bg-[#080c14] relative" data-testid="section-contato">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[hsl(192,85%,48%)]/5 rounded-full blur-3xl" />
+      </div>
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="text-center"
+          className="text-center mb-16"
         >
-          <motion.div variants={fadeInUp} custom={0} className="relative">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-64 h-64 bg-[hsl(192,85%,48%)]/5 rounded-full blur-3xl" />
-            </div>
-            <div className="relative">
-              <img
-                src="/images/corb3d-robot-cropped.png"
-                alt="Corb3D"
-                className="w-20 h-20 mx-auto mb-8 opacity-60"
-                data-testid="img-cta-logo"
-              />
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6" data-testid="text-cta-title">
-                Pronto Para Dar Vida<br />ao Seu Projeto?
-              </h2>
-              <p className="text-white/50 max-w-lg mx-auto mb-10 text-lg" data-testid="text-cta-desc">
-                Entre em contato e receba um orcamento personalizado.
-                Estamos prontos para transformar sua ideia em realidade.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <motion.div variants={fadeInUp} custom={0} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[hsl(192,85%,48%)]/20 bg-[hsl(192,85%,48%)]/5 mb-6" data-testid="badge-contato">
+            <Mail className={`w-3.5 h-3.5 ${CYAN_CLASS}`} />
+            <span className={`text-xs font-medium ${CYAN_CLASS} uppercase tracking-wider`}>Contato</span>
+          </motion.div>
+          <motion.h2 variants={fadeInUp} custom={1} className="text-3xl md:text-4xl font-bold text-white mb-4" data-testid="text-contato-title">
+            Solicite Seu Orcamento
+          </motion.h2>
+          <motion.p variants={fadeInUp} custom={2} className="text-white/50 max-w-xl mx-auto" data-testid="text-contato-desc">
+            Preencha o formulario abaixo ou fale diretamente pelo WhatsApp.
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={staggerContainer}
+          className="grid lg:grid-cols-5 gap-8"
+        >
+          <motion.div variants={fadeInUp} custom={0} className="lg:col-span-3">
+            <Card className="bg-white/[0.03] border-white/[0.06] p-6 md:p-8" data-testid="card-contact-form">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-white/40 mb-1.5 block">Nome</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+                      placeholder="Seu nome"
+                      data-testid="input-name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 mb-1.5 block">E-mail</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+                      placeholder="seu@email.com"
+                      data-testid="input-email"
+                    />
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-white/40 mb-1.5 block">Telefone</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+                      placeholder="(00) 00000-0000"
+                      data-testid="input-phone"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-white/40 mb-1.5 block">Servico</label>
+                    <select
+                      value={formData.service}
+                      onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                      className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+                      data-testid="select-service"
+                    >
+                      <option value="" className="bg-[#0a0e17]">Selecione um servico</option>
+                      <option value="Impressao FDM" className="bg-[#0a0e17]">Impressao FDM</option>
+                      <option value="Modelagem 3D" className="bg-[#0a0e17]">Modelagem 3D</option>
+                      <option value="Escaneamento 3D" className="bg-[#0a0e17]">Escaneamento 3D</option>
+                      <option value="Pos-Processamento" className="bg-[#0a0e17]">Pos-Processamento</option>
+                      <option value="Outro" className="bg-[#0a0e17]">Outro</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-white/40 mb-1.5 block">Mensagem</label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors resize-none"
+                    placeholder="Descreva seu projeto, material desejado, quantidade, dimensoes..."
+                    data-testid="textarea-message"
+                  />
+                </div>
                 <Button
+                  type="submit"
                   size="lg"
-                  className="font-bold text-base px-10"
-                  data-testid="button-orcamento-cta"
+                  className="w-full font-bold text-base"
+                  data-testid="button-submit-orcamento"
                 >
-                  Solicitar Orcamento Gratis
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                  {sent ? "E-mail aberto! Envie pelo seu app de e-mail." : "Enviar Orcamento"}
+                  {!sent && <Send className="ml-2 w-4 h-4" />}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white/20 text-white bg-white/5 font-semibold text-base px-8"
-                  data-testid="button-whatsapp"
-                >
-                  Falar no WhatsApp
-                </Button>
+              </form>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={fadeInUp} custom={1} className="lg:col-span-2 space-y-4">
+            <Card
+              className="bg-white/[0.03] border-white/[0.06] p-6 hover-elevate cursor-pointer"
+              onClick={openWhatsApp}
+              data-testid="card-whatsapp"
+            >
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-12 h-12 rounded-md bg-green-500/10 flex items-center justify-center">
+                  <MessageCircle className="w-6 h-6 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">WhatsApp</h3>
+                  <p className="text-xs text-white/40">Resposta rapida</p>
+                </div>
               </div>
-            </div>
+              <p className="text-sm text-white/50 mb-4">
+                Fale diretamente com nossa equipe pelo WhatsApp para orcamentos rapidos.
+              </p>
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-400">
+                Iniciar Conversa <ArrowRight className="w-4 h-4" />
+              </span>
+            </Card>
+
+            <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-email-info">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-12 h-12 rounded-md bg-[hsl(192,85%,48%)]/10 flex items-center justify-center">
+                  <Mail className={`w-6 h-6 ${CYAN_CLASS}`} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">E-mail</h3>
+                  <p className="text-xs text-white/40">Orcamentos detalhados</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/50">
+                Envie seu projeto detalhado e receba um orcamento completo.
+              </p>
+              <p className={`text-sm font-medium ${CYAN_CLASS} mt-3`} data-testid="text-email-address">
+                {CONTACT_EMAIL}
+              </p>
+            </Card>
+
+            <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-phone-info">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-md bg-[hsl(192,85%,48%)]/10 flex items-center justify-center">
+                  <Phone className={`w-6 h-6 ${CYAN_CLASS}`} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Horario de Atendimento</h3>
+                  <p className="text-xs text-white/40 mt-1">Seg a Sex, 8h as 18h</p>
+                </div>
+              </div>
+            </Card>
           </motion.div>
         </motion.div>
       </div>
