@@ -67,7 +67,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3" data-testid="navbar-brand">
           <img
-            src="/images/corb3d-robot-head.png"
+            src="/images/corb3d-robot.png"
             alt="Corb3D"
             className="h-12 w-12 object-contain"
             data-testid="img-logo-icon"
@@ -143,7 +143,7 @@ function HeroSection() {
           <motion.div variants={fadeInUp} custom={0}>
             <div className="flex flex-col items-center gap-4">
               <img
-                src="/images/corb3d-robot-head.png"
+                src="/images/corb3d-robot.png"
                 alt="Corb3D Robot"
                 className="h-32 md:h-44 object-contain drop-shadow-2xl"
                 data-testid="img-hero-icon"
@@ -480,7 +480,7 @@ function CTASection() {
             </div>
             <div className="relative">
               <img
-                src="/images/corb3d-robot-head.png"
+                src="/images/corb3d-robot.png"
                 alt="Corb3D"
                 className="w-20 h-20 mx-auto mb-8 opacity-60"
                 data-testid="img-cta-logo"
@@ -525,7 +525,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3" data-testid="footer-brand">
             <img
-              src="/images/corb3d-robot-head.png"
+              src="/images/corb3d-robot.png"
               alt="Corb3D"
               className="h-10 w-10 object-contain opacity-60"
               data-testid="img-footer-logo"
