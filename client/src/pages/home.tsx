@@ -45,12 +45,12 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3" data-testid="navbar-brand">
           <img
-            src="/images/corb3d-logo-icon.png"
+            src="/images/corb3d-logo-icon-v2.png"
             alt="Corb3D"
-            className="h-10 w-10 object-contain"
+            className="h-12 w-12 object-contain"
             data-testid="img-logo-icon"
           />
-          <span className="text-xl font-bold tracking-tight text-white" data-testid="text-brand-name">
+          <span className="text-2xl font-bold tracking-tight text-white" data-testid="text-brand-name">
             CORB<span className={CYAN_CLASS}>3D</span>
           </span>
         </div>
@@ -106,9 +106,9 @@ function HeroSection() {
         >
           <motion.div variants={fadeInUp} custom={0}>
             <img
-              src="/images/corb3d-logo-full.png"
+              src="/images/corb3d-logo-full-v2.png"
               alt="Corb3D Logo"
-              className="h-20 md:h-28 mx-auto object-contain drop-shadow-2xl"
+              className="h-28 md:h-40 mx-auto object-contain drop-shadow-2xl"
               data-testid="img-hero-logo"
             />
           </motion.div>
@@ -427,9 +427,9 @@ function CTASection() {
             </div>
             <div className="relative">
               <img
-                src="/images/corb3d-logo-icon.png"
+                src="/images/corb3d-logo-icon-v2.png"
                 alt="Corb3D"
-                className="w-16 h-16 mx-auto mb-8 opacity-60"
+                className="w-20 h-20 mx-auto mb-8 opacity-60"
                 data-testid="img-cta-logo"
               />
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6" data-testid="text-cta-title">
@@ -472,9 +472,9 @@ function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3" data-testid="footer-brand">
             <img
-              src="/images/corb3d-logo-icon.png"
+              src="/images/corb3d-logo-icon-v2.png"
               alt="Corb3D"
-              className="h-8 w-8 object-contain opacity-60"
+              className="h-10 w-10 object-contain opacity-60"
               data-testid="img-footer-logo"
             />
             <span className="text-sm font-semibold text-white/60" data-testid="text-footer-brand">
