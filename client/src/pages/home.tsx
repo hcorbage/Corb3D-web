@@ -82,14 +82,14 @@ function HeroSection() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       data-testid="section-hero"
     >
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#060a14] via-[#0a0e17] to-[#0d1221]">
         <img
-          src="/images/hero-bg-v7.png"
+          src="/images/hero-bg-v6.png"
           alt=""
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-25"
           data-testid="img-hero-bg"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/60 via-[#0a0e17]/40 to-[#0a0e17]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17]/50 via-transparent to-[#0a0e17]/80" />
       </div>
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
