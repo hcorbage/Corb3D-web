@@ -271,7 +271,7 @@ function ServicesSection() {
     },
     {
       icon: Calculator,
-      title: "Calculadora 3D",
+      title: "Corb3D Manager",
       description:
         "Sistema completo para profissionais e empresas de impressao 3D. Controle de impressoes, calculo de custos, orcamentos e gestao do seu negocio.",
       link: "https://solid3d.replit.app",
