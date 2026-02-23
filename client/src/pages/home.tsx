@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine } from "lucide-react";
+import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
@@ -255,6 +255,13 @@ function ServicesSection() {
       description:
         "Lixamento, pintura, acetona smoothing e acabamentos profissionais para resultados impecaveis.",
     },
+    {
+      icon: Calculator,
+      title: "Calculadora",
+      description:
+        "Calcule o custo estimado da sua impressao 3D de forma rapida e simples.",
+      link: "#",
+    },
   ];
 
   return (
@@ -290,8 +297,8 @@ function ServicesSection() {
           variants={staggerContainer}
           className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {services.map((service, i) => (
-            <motion.div key={service.title} variants={fadeInUp} custom={i}>
+          {services.map((service, i) => {
+            const cardContent = (
               <Card
                 className={`bg-white/[0.03] border-white/[0.06] p-6 h-full hover-elevate relative ${service.comingSoon ? "opacity-70" : ""}`}
                 data-testid={`card-service-${i}`}
@@ -310,9 +317,27 @@ function ServicesSection() {
                 <p className="text-sm text-white/50 leading-relaxed" data-testid={`text-service-desc-${i}`}>
                   {service.description}
                 </p>
+                {service.link && (
+                  <div className="mt-4 flex items-center gap-1.5">
+                    <span className={`text-sm font-medium ${CYAN_CLASS}`}>Acessar</span>
+                    <ArrowRight className={`w-4 h-4 ${CYAN_CLASS}`} />
+                  </div>
+                )}
               </Card>
-            </motion.div>
-          ))}
+            );
+
+            return (
+              <motion.div key={service.title} variants={fadeInUp} custom={i}>
+                {service.link ? (
+                  <a href={service.link} className="block h-full no-underline" data-testid={`link-service-${i}`}>
+                    {cardContent}
+                  </a>
+                ) : (
+                  cardContent
+                )}
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>
