@@ -7,6 +7,28 @@ import { useState, useEffect } from "react";
 const CYAN = "hsl(192 85% 50%)";
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
 
+const floatAnimation = (delay: number, duration: number, y: number) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: {
+    opacity: [0, 0.12, 0.12, 0],
+    y: [y, y - 15, y + 10, y],
+    transition: {
+      delay,
+      duration,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+});
+
+const heroObjects = [
+  { src: "/images/enterprise-wireframe.png", className: "top-[6%] right-[4%] w-[20%]", delay: 0, duration: 12, y: 0, testId: "img-enterprise-overlay" },
+  { src: "/images/shuttle-wireframe.png", className: "top-[12%] left-[4%] w-[16%]", delay: 2, duration: 14, y: 0, testId: "img-shuttle-overlay" },
+  { src: "/images/cristo-wireframe.png", className: "bottom-[10%] right-[6%] w-[11%]", delay: 4, duration: 16, y: 0, testId: "img-cristo-overlay" },
+  { src: "/images/ship-wireframe.png", className: "bottom-[15%] left-[6%] w-[15%]", delay: 1, duration: 13, y: 0, testId: "img-ship-overlay" },
+  { src: "/images/charrete-wireframe.png", className: "bottom-[6%] left-[40%] w-[13%]", delay: 3, duration: 15, y: 0, testId: "img-charrete-overlay" },
+];
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
@@ -93,36 +115,20 @@ function HeroSection() {
       </div>
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img
-          src="/images/enterprise-wireframe.png"
-          alt=""
-          className="absolute top-[5%] right-[3%] w-[22%] opacity-20"
-          data-testid="img-enterprise-overlay"
-        />
-        <img
-          src="/images/shuttle-wireframe.png"
-          alt=""
-          className="absolute top-[10%] left-[3%] w-[20%] opacity-20"
-          data-testid="img-shuttle-overlay"
-        />
-        <img
-          src="/images/cristo-wireframe.png"
-          alt=""
-          className="absolute bottom-[8%] right-[8%] w-[14%] opacity-20"
-          data-testid="img-cristo-overlay"
-        />
-        <img
-          src="/images/ship-wireframe.png"
-          alt=""
-          className="absolute bottom-[12%] left-[5%] w-[18%] opacity-20"
-          data-testid="img-ship-overlay"
-        />
-        <img
-          src="/images/charrete-wireframe.png"
-          alt=""
-          className="absolute bottom-[5%] left-[35%] w-[16%] opacity-20"
-          data-testid="img-charrete-overlay"
-        />
+        {heroObjects.map((obj) => {
+          const anim = floatAnimation(obj.delay, obj.duration, obj.y);
+          return (
+            <motion.img
+              key={obj.testId}
+              src={obj.src}
+              alt=""
+              className={`absolute ${obj.className}`}
+              initial={anim.initial}
+              animate={anim.animate}
+              data-testid={obj.testId}
+            />
+          );
+        })}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[hsl(192,85%,48%)]/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[hsl(210,85%,45%)]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
