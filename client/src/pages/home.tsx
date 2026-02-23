@@ -84,7 +84,7 @@ function HeroSection() {
     >
       <div className="absolute inset-0 bg-gradient-to-b from-[#060a14] via-[#0a0e17] to-[#0d1221]">
         <img
-          src="/images/hero-bg-v6.png"
+          src="/images/hero-bg-v8.png"
           alt=""
           className="w-full h-full object-cover opacity-25"
           data-testid="img-hero-bg"
@@ -93,6 +93,18 @@ function HeroSection() {
       </div>
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <img
+          src="/images/batwing-wireframe.png"
+          alt=""
+          className="absolute top-[5%] left-[3%] w-[28%] opacity-15"
+          data-testid="img-batwing-overlay"
+        />
+        <img
+          src="/images/sword-wireframe.png"
+          alt=""
+          className="absolute bottom-[5%] left-[5%] w-[18%] opacity-15 rotate-[-20deg]"
+          data-testid="img-sword-overlay"
+        />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[hsl(192,85%,48%)]/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[hsl(210,85%,45%)]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
