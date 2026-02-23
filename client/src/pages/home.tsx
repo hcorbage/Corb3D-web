@@ -84,7 +84,7 @@ function HeroSection() {
     >
       <div className="absolute inset-0">
         <img
-          src="/images/hero-bg-v4.png"
+          src="/images/hero-bg-v5.png"
           alt=""
           className="w-full h-full object-cover"
           data-testid="img-hero-bg"
