@@ -260,7 +260,7 @@ function ServicesSection() {
       title: "Calculadora 3D",
       description:
         "Sistema completo para profissionais e empresas de impressao 3D. Controle de impressoes, calculo de custos, orcamentos e gestao do seu negocio.",
-      link: "#",
+      link: "https://solid3d.replit.app",
     },
   ];
 
