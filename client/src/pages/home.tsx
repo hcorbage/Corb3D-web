@@ -45,12 +45,12 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3" data-testid="navbar-brand">
           <img
-            src="/images/corb3d-logo-icon-v2.png"
+            src="/images/corb3d-icon-v3.png"
             alt="Corb3D"
             className="h-12 w-12 object-contain"
             data-testid="img-logo-icon"
           />
-          <span className="text-2xl font-bold tracking-tight text-white" data-testid="text-brand-name">
+          <span className="text-3xl font-bold tracking-tight text-white" data-testid="text-brand-name">
             CORB<span className={CYAN_CLASS}>3D</span>
           </span>
         </div>
@@ -105,12 +105,17 @@ function HeroSection() {
           className="space-y-8"
         >
           <motion.div variants={fadeInUp} custom={0}>
-            <img
-              src="/images/corb3d-logo-full-v2.png"
-              alt="Corb3D Logo"
-              className="h-28 md:h-40 mx-auto object-contain drop-shadow-2xl"
-              data-testid="img-hero-logo"
-            />
+            <div className="flex items-center justify-center gap-5">
+              <img
+                src="/images/corb3d-icon-v3.png"
+                alt="Corb3D Icon"
+                className="h-20 md:h-28 object-contain drop-shadow-2xl"
+                data-testid="img-hero-icon"
+              />
+              <span className="text-6xl md:text-8xl font-bold tracking-tight text-white drop-shadow-2xl" data-testid="img-hero-logo">
+                CORB<span className={CYAN_CLASS}>3D</span>
+              </span>
+            </div>
           </motion.div>
 
           <motion.p
@@ -217,8 +222,12 @@ function ServicesSection() {
   ];
 
   return (
-    <section id="servicos" className="py-24 bg-[#0a0e17]" data-testid="section-servicos">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="servicos" className="py-24 bg-[#0a0e17] relative" data-testid="section-servicos">
+      <div className="absolute inset-0 pointer-events-none">
+        <img src="/images/bg-services.png" alt="" className="w-full h-full object-cover opacity-15" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-transparent to-[#0a0e17]" />
+      </div>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -276,8 +285,12 @@ function ServicesSection() {
 
 function AboutSection() {
   return (
-    <section id="sobre" className="py-24 bg-[#080c14]" data-testid="section-sobre">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="sobre" className="py-24 bg-[#080c14] relative" data-testid="section-sobre">
+      <div className="absolute inset-0 pointer-events-none">
+        <img src="/images/bg-about.png" alt="" className="w-full h-full object-cover opacity-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080c14] via-transparent to-[#080c14]" />
+      </div>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -360,8 +373,12 @@ function DifferentialsSection() {
   ];
 
   return (
-    <section id="diferenciais" className="py-24 bg-[#0a0e17]" data-testid="section-diferenciais">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="diferenciais" className="py-24 bg-[#0a0e17] relative" data-testid="section-diferenciais">
+      <div className="absolute inset-0 pointer-events-none">
+        <img src="/images/bg-differentials.png" alt="" className="w-full h-full object-cover opacity-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-transparent to-[#0a0e17]" />
+      </div>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -427,7 +444,7 @@ function CTASection() {
             </div>
             <div className="relative">
               <img
-                src="/images/corb3d-logo-icon-v2.png"
+                src="/images/corb3d-icon-v3.png"
                 alt="Corb3D"
                 className="w-20 h-20 mx-auto mb-8 opacity-60"
                 data-testid="img-cta-logo"
@@ -472,7 +489,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3" data-testid="footer-brand">
             <img
-              src="/images/corb3d-logo-icon-v2.png"
+              src="/images/corb3d-icon-v3.png"
               alt="Corb3D"
               className="h-10 w-10 object-contain opacity-60"
               data-testid="img-footer-logo"
