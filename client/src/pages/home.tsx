@@ -93,6 +93,12 @@ function HeroSection() {
       </div>
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <img
+          src="/images/enterprise-wireframe.png"
+          alt=""
+          className="absolute top-[8%] right-[5%] w-[22%] opacity-15"
+          data-testid="img-enterprise-overlay"
+        />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[hsl(192,85%,48%)]/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[hsl(210,85%,45%)]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
       </div>
