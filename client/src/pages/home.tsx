@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { SiInstagram } from "react-icons/si";
 
 const CYAN = "hsl(192 85% 50%)";
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
@@ -680,6 +681,32 @@ function CTASection() {
               </p>
             </Card>
 
+            <a
+              href="https://instagram.com/corb3d_br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block no-underline"
+              data-testid="link-instagram-cta"
+            >
+              <Card className="bg-white/[0.03] border-white/[0.06] p-6 hover-elevate cursor-pointer" data-testid="card-instagram">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="w-12 h-12 rounded-md bg-pink-500/10 flex items-center justify-center">
+                    <SiInstagram className="w-6 h-6 text-pink-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Instagram</h3>
+                    <p className="text-xs text-white/40">@corb3d_br</p>
+                  </div>
+                </div>
+                <p className="text-sm text-white/50">
+                  Siga-nos para acompanhar nossos projetos e novidades.
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-pink-400 mt-3">
+                  Seguir <ArrowRight className="w-4 h-4" />
+                </span>
+              </Card>
+            </a>
+
             <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-phone-info">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-md bg-[hsl(192,85%,48%)]/10 flex items-center justify-center">
@@ -718,6 +745,16 @@ function Footer() {
             &copy; {new Date().getFullYear()} Corb3D. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-6 flex-wrap">
+            <a
+              href="https://instagram.com/corb3d_br"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors"
+              data-testid="link-instagram"
+            >
+              <SiInstagram className="w-4 h-4" />
+              <span className="text-xs">@corb3d_br</span>
+            </a>
             <a href="#" className="text-xs text-white/40" data-testid="link-termos">Termos de Uso</a>
             <a href="#" className="text-xs text-white/40" data-testid="link-privacidade">Privacidade</a>
           </div>
