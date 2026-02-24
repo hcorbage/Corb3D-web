@@ -2,7 +2,13 @@
 
 ## Overview
 
-Corb3D is a professional 3D printing services website built as a full-stack TypeScript application. It features a landing page showcasing 3D printing services (prototyping, serial production, 3D modeling) with a dark-themed, animated UI. The project follows a monorepo structure with a React frontend, Express backend, and PostgreSQL database using Drizzle ORM.
+Corb3D is a professional 3D printing services website built as a full-stack TypeScript application. It features a landing page showcasing 3D printing services (prototyping, serial production, 3D modeling) with a dark-themed, animated UI, a contact form that saves messages to a PostgreSQL database, and an admin dashboard for managing contact messages. The project follows a monorepo structure with a React frontend, Express backend, and PostgreSQL database using Drizzle ORM.
+
+### Admin Dashboard
+- **Route**: `/admin` — login-protected admin area
+- **Auth**: Session-based with express-session + connect-pg-simple, username "admin", password from ADMIN_PASSWORD env var
+- **Features**: View contact messages, mark as read, delete messages
+- **Footer link**: Small "Admin" link in the site footer
 
 ## User Preferences
 
