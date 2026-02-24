@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine, Calculator, Mail, MessageCircle, Send, Phone } from "lucide-react";
+import { Printer, Layers, Shield, Zap, ArrowRight, ChevronDown, Box, Settings, Award, Clock, ScanLine, Calculator, Mail, MessageCircle, Send, Phone, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { SiInstagram } from "react-icons/si";
+import { apiRequest } from "@/lib/queryClient";
 
 const CYAN = "hsl(192 85% 50%)";
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
@@ -509,8 +510,19 @@ function CTASection() {
   const WHATSAPP_NUMBER = "5500000000000";
   const CONTACT_EMAIL = "contato@corb3d.com";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      await apiRequest("POST", "/api/contact", {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        service: formData.service || null,
+        message: formData.message,
+      });
+    } catch (err) {
+      console.error("Error saving contact:", err);
+    }
     const subject = encodeURIComponent(`Orcamento Corb3D - ${formData.service || "Geral"}`);
     const body = encodeURIComponent(
       `Nome: ${formData.name}\nE-mail: ${formData.email}\nTelefone: ${formData.phone}\nServico: ${formData.service}\n\nMensagem:\n${formData.message}`
@@ -757,6 +769,10 @@ function Footer() {
             </a>
             <a href="#" className="text-xs text-white/40" data-testid="link-termos">Termos de Uso</a>
             <a href="#" className="text-xs text-white/40" data-testid="link-privacidade">Privacidade</a>
+            <a href="/admin" className="inline-flex items-center gap-1 text-xs text-white/20 hover:text-white/40 transition-colors" data-testid="link-admin">
+              <Lock className="w-3 h-3" />
+              Admin
+            </a>
           </div>
         </div>
       </div>
