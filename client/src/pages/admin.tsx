@@ -39,11 +39,11 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             <Lock className={`w-8 h-8 ${CYAN_CLASS}`} />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Admin</h1>
-          <p className="text-sm text-white/40">Area restrita Corb3D</p>
+          <p className="text-sm text-white/60">Area restrita Corb3D</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs text-white/40 mb-1.5 block">Usuario</label>
+            <label className="text-xs text-white/70 mb-1.5 block">Usuario</label>
             <input
               type="text"
               required
@@ -55,7 +55,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
             />
           </div>
           <div>
-            <label className="text-xs text-white/40 mb-1.5 block">Senha</label>
+            <label className="text-xs text-white/70 mb-1.5 block">Senha</label>
             <input
               type="password"
               required
@@ -80,7 +80,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
           </Button>
         </form>
         <div className="mt-6 text-center">
-          <a href="/" className="text-xs text-white/30 hover:text-white/50 transition-colors inline-flex items-center gap-1" data-testid="link-back-home">
+          <a href="/" className="text-xs text-white/50 hover:text-white/70 transition-colors inline-flex items-center gap-1" data-testid="link-back-home">
             <ArrowLeft className="w-3 h-3" /> Voltar ao site
           </a>
         </div>
@@ -107,7 +107,7 @@ function MessageCard({ msg, onMarkRead, onDelete }: { msg: ContactMessage; onMar
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className={`text-base font-semibold ${msg.read ? "text-white/60" : "text-white"}`} data-testid={`text-msg-name-${msg.id}`}>
+            <h3 className={`text-base font-semibold ${msg.read ? "text-white/80" : "text-white"}`} data-testid={`text-msg-name-${msg.id}`}>
               {msg.name}
             </h3>
             {!msg.read && (
@@ -116,7 +116,7 @@ function MessageCard({ msg, onMarkRead, onDelete }: { msg: ContactMessage; onMar
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1 text-xs text-white/30">
+          <div className="flex items-center gap-1 text-xs text-white/50">
             <Clock className="w-3 h-3" />
             <span data-testid={`text-msg-date-${msg.id}`}>{formatted}</span>
           </div>
@@ -144,18 +144,18 @@ function MessageCard({ msg, onMarkRead, onDelete }: { msg: ContactMessage; onMar
       </div>
 
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-white/50">
+        <div className="flex items-center gap-2 text-white/70">
           <Mail className="w-3.5 h-3.5 shrink-0" />
           <span data-testid={`text-msg-email-${msg.id}`}>{msg.email}</span>
         </div>
         {msg.phone && (
-          <div className="flex items-center gap-2 text-white/50">
+          <div className="flex items-center gap-2 text-white/70">
             <Phone className="w-3.5 h-3.5 shrink-0" />
             <span data-testid={`text-msg-phone-${msg.id}`}>{msg.phone}</span>
           </div>
         )}
         {msg.service && (
-          <div className="flex items-center gap-2 text-white/50">
+          <div className="flex items-center gap-2 text-white/70">
             <Briefcase className="w-3.5 h-3.5 shrink-0" />
             <span data-testid={`text-msg-service-${msg.id}`}>{msg.service}</span>
           </div>
@@ -163,7 +163,7 @@ function MessageCard({ msg, onMarkRead, onDelete }: { msg: ContactMessage; onMar
       </div>
 
       <div className="mt-4 pt-3 border-t border-white/[0.06]">
-        <p className="text-sm text-white/70 whitespace-pre-wrap leading-relaxed" data-testid={`text-msg-body-${msg.id}`}>
+        <p className="text-sm text-white/85 whitespace-pre-wrap leading-relaxed" data-testid={`text-msg-body-${msg.id}`}>
           {msg.message}
         </p>
       </div>
@@ -222,14 +222,14 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               <h1 className="text-lg font-bold text-white" data-testid="text-admin-title">
                 CORB<span className={CYAN_CLASS}>3D</span> Admin
               </h1>
-              <p className="text-xs text-white/40">Mensagens de contato</p>
+              <p className="text-xs text-white/60">Mensagens de contato</p>
             </div>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => logoutMutation.mutate()}
-            className="text-white/50 border-white/10 hover:bg-white/5"
+            className="text-white/70 border-white/15 hover:bg-white/10"
             data-testid="button-admin-logout"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -241,17 +241,17 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="flex items-center gap-4 mb-8 flex-wrap">
           <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-total">
-            <Mail className="w-5 h-5 text-white/40" />
+            <Mail className="w-5 h-5 text-white/60" />
             <div>
               <p className="text-2xl font-bold text-white">{totalCount}</p>
-              <p className="text-xs text-white/40">Total</p>
+              <p className="text-xs text-white/60">Total</p>
             </div>
           </Card>
           <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-unread">
             <div className="w-2 h-2 rounded-full bg-[hsl(192,85%,48%)]" />
             <div>
               <p className={`text-2xl font-bold ${CYAN_CLASS}`}>{unreadCount}</p>
-              <p className="text-xs text-white/40">Nao lidas</p>
+              <p className="text-xs text-white/60">Nao lidas</p>
             </div>
           </Card>
         </div>
@@ -280,8 +280,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         ) : (
           <Card className="bg-white/[0.03] border-white/[0.06] p-12 text-center" data-testid="card-no-messages">
             <Mail className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white/60 mb-2">Nenhuma mensagem</h3>
-            <p className="text-sm text-white/40">As mensagens enviadas pelo formulario de contato aparecerao aqui.</p>
+            <h3 className="text-lg font-semibold text-white/80 mb-2">Nenhuma mensagem</h3>
+            <p className="text-sm text-white/60">As mensagens enviadas pelo formulario de contato aparecerao aqui.</p>
           </Card>
         )}
       </main>
