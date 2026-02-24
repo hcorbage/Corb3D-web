@@ -22,7 +22,7 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-const ADMIN_USERNAME = "admin";
+const ADMIN_USERNAME = "hcorbage";
 const ADMIN_PASSWORD_ENV = process.env.ADMIN_PASSWORD;
 
 if (!ADMIN_PASSWORD_ENV) {
