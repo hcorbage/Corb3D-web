@@ -126,6 +126,15 @@ export async function registerRoutes(
     storage.markMessageRead(id).then(() => res.json({ ok: true }));
   });
 
+  app.patch("/api/admin/messages/:id/unread", (req, res) => {
+    if (!req.session.isAdmin) {
+      return res.status(401).json({ message: "Nao autorizado" });
+    }
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
+    storage.markMessageUnread(id).then(() => res.json({ ok: true }));
+  });
+
   app.delete("/api/admin/messages/:id", (req, res) => {
     if (!req.session.isAdmin) {
       return res.status(401).json({ message: "Nao autorizado" });

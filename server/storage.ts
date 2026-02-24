@@ -9,6 +9,7 @@ export interface IStorage {
   createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
   getContactMessages(): Promise<ContactMessage[]>;
   markMessageRead(id: number): Promise<void>;
+  markMessageUnread(id: number): Promise<void>;
   deleteMessage(id: number): Promise<void>;
 }
 
@@ -39,6 +40,10 @@ export class DatabaseStorage implements IStorage {
 
   async markMessageRead(id: number): Promise<void> {
     await db.update(contactMessages).set({ read: true }).where(eq(contactMessages.id, id));
+  }
+
+  async markMessageUnread(id: number): Promise<void> {
+    await db.update(contactMessages).set({ read: false }).where(eq(contactMessages.id, id));
   }
 
   async deleteMessage(id: number): Promise<void> {

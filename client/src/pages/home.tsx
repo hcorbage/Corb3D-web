@@ -217,7 +217,7 @@ function HeroSection() {
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.toLowerCase().replace(/\s/g, "-")}`}>
                 <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-xs text-white/50 mt-1">{stat.label}</div>
+                <div className="text-xs text-white/65 mt-1">{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -300,7 +300,7 @@ function ServicesSection() {
           <motion.h2 variants={fadeInUp} custom={1} className="text-3xl md:text-4xl font-bold text-white mb-4" data-testid="text-servicos-title">
             Solucoes Completas em Impressao 3D
           </motion.h2>
-          <motion.p variants={fadeInUp} custom={2} className="text-white/50 max-w-xl mx-auto" data-testid="text-servicos-desc">
+          <motion.p variants={fadeInUp} custom={2} className="text-white/65 max-w-xl mx-auto" data-testid="text-servicos-desc">
             Da ideia ao produto final, oferecemos todo o suporte que voce precisa.
           </motion.p>
         </motion.div>
@@ -329,7 +329,7 @@ function ServicesSection() {
                 <h3 className="text-lg font-semibold text-white mb-3" data-testid={`text-service-title-${i}`}>
                   {service.title}
                 </h3>
-                <p className="text-sm text-white/50 leading-relaxed" data-testid={`text-service-desc-${i}`}>
+                <p className="text-sm text-white/65 leading-relaxed" data-testid={`text-service-desc-${i}`}>
                   {service.description}
                 </p>
                 {service.link && (
@@ -414,7 +414,7 @@ function AboutSection() {
               >
                 <item.icon className={`w-8 h-8 ${CYAN_CLASS} mb-3`} />
                 <h4 className="text-sm font-semibold text-white mb-1" data-testid={`text-about-title-${i}`}>{item.title}</h4>
-                <p className="text-xs text-white/40" data-testid={`text-about-desc-${i}`}>{item.desc}</p>
+                <p className="text-xs text-white/60" data-testid={`text-about-desc-${i}`}>{item.desc}</p>
               </Card>
             ))}
           </motion.div>
@@ -469,7 +469,7 @@ function DifferentialsSection() {
           <motion.h2 variants={fadeInUp} custom={1} className="text-3xl md:text-4xl font-bold text-white mb-4" data-testid="text-diferenciais-title">
             Por Que Escolher a Corb3D?
           </motion.h2>
-          <motion.p variants={fadeInUp} custom={2} className="text-white/50 max-w-xl mx-auto" data-testid="text-diferenciais-desc">
+          <motion.p variants={fadeInUp} custom={2} className="text-white/65 max-w-xl mx-auto" data-testid="text-diferenciais-desc">
             Compromisso com resultados excepcionais em cada projeto.
           </motion.p>
         </motion.div>
@@ -492,7 +492,7 @@ function DifferentialsSection() {
                 </span>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2" data-testid={`text-diff-title-${i}`}>{item.title}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed" data-testid={`text-diff-desc-${i}`}>{item.description}</p>
+                  <p className="text-sm text-white/65 leading-relaxed" data-testid={`text-diff-desc-${i}`}>{item.description}</p>
                 </div>
               </div>
             </motion.div>
@@ -557,7 +557,7 @@ function CTASection() {
           <motion.h2 variants={fadeInUp} custom={1} className="text-3xl md:text-4xl font-bold text-white mb-4" data-testid="text-contato-title">
             Solicite Seu Orcamento
           </motion.h2>
-          <motion.p variants={fadeInUp} custom={2} className="text-white/50 max-w-xl mx-auto" data-testid="text-contato-desc">
+          <motion.p variants={fadeInUp} custom={2} className="text-white/65 max-w-xl mx-auto" data-testid="text-contato-desc">
             Preencha o formulario abaixo ou fale diretamente pelo WhatsApp.
           </motion.p>
         </motion.div>
@@ -574,7 +574,7 @@ function CTASection() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-white/40 mb-1.5 block">Nome</label>
+                    <label className="text-xs text-white/60 mb-1.5 block">Nome</label>
                     <input
                       type="text"
                       required
@@ -586,7 +586,7 @@ function CTASection() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-white/40 mb-1.5 block">E-mail</label>
+                    <label className="text-xs text-white/60 mb-1.5 block">E-mail</label>
                     <input
                       type="email"
                       required
@@ -600,7 +600,7 @@ function CTASection() {
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-white/40 mb-1.5 block">Telefone</label>
+                    <label className="text-xs text-white/60 mb-1.5 block">Telefone</label>
                     <input
                       type="tel"
                       value={formData.phone}
@@ -611,7 +611,7 @@ function CTASection() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-white/40 mb-1.5 block">Servico</label>
+                    <label className="text-xs text-white/60 mb-1.5 block">Servico</label>
                     <select
                       value={formData.service}
                       onChange={(e) => setFormData({ ...formData, service: e.target.value })}
@@ -628,7 +628,7 @@ function CTASection() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-white/40 mb-1.5 block">Mensagem</label>
+                  <label className="text-xs text-white/60 mb-1.5 block">Mensagem</label>
                   <textarea
                     required
                     rows={4}
@@ -664,10 +664,10 @@ function CTASection() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">WhatsApp</h3>
-                  <p className="text-xs text-white/40">Resposta rapida</p>
+                  <p className="text-xs text-white/60">Resposta rapida</p>
                 </div>
               </div>
-              <p className="text-sm text-white/50 mb-4">
+              <p className="text-sm text-white/65 mb-4">
                 Fale diretamente com nossa equipe pelo WhatsApp para orcamentos rapidos.
               </p>
               <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-400">
@@ -682,10 +682,10 @@ function CTASection() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">E-mail</h3>
-                  <p className="text-xs text-white/40">Orcamentos detalhados</p>
+                  <p className="text-xs text-white/60">Orcamentos detalhados</p>
                 </div>
               </div>
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-white/65">
                 Envie seu projeto detalhado e receba um orcamento completo.
               </p>
               <p className={`text-sm font-medium ${CYAN_CLASS} mt-3`} data-testid="text-email-address">
@@ -707,10 +707,10 @@ function CTASection() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white">Instagram</h3>
-                    <p className="text-xs text-white/40">@corb3d_br</p>
+                    <p className="text-xs text-white/60">@corb3d_br</p>
                   </div>
                 </div>
-                <p className="text-sm text-white/50">
+                <p className="text-sm text-white/65">
                   Siga-nos para acompanhar nossos projetos e novidades.
                 </p>
                 <span className="inline-flex items-center gap-1.5 text-sm font-medium text-pink-400 mt-3">
@@ -726,7 +726,7 @@ function CTASection() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white">Horario de Atendimento</h3>
-                  <p className="text-xs text-white/40 mt-1">Seg a Sex, 8h as 18h</p>
+                  <p className="text-xs text-white/60 mt-1">Seg a Sex, 8h as 18h</p>
                 </div>
               </div>
             </Card>
@@ -753,7 +753,7 @@ function Footer() {
               CORB<span className={CYAN_CLASS}>3D</span>
             </span>
           </div>
-          <p className="text-xs text-white/30" data-testid="text-copyright">
+          <p className="text-xs text-white/50" data-testid="text-copyright">
             &copy; {new Date().getFullYear()} Corb3D. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-6 flex-wrap">
@@ -761,15 +761,15 @@ function Footer() {
               href="https://instagram.com/corb3d_br"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors"
+              className="flex items-center gap-1.5 text-white/60 hover:text-white/80 transition-colors"
               data-testid="link-instagram"
             >
               <SiInstagram className="w-4 h-4" />
               <span className="text-xs">@corb3d_br</span>
             </a>
-            <a href="#" className="text-xs text-white/40" data-testid="link-termos">Termos de Uso</a>
-            <a href="#" className="text-xs text-white/40" data-testid="link-privacidade">Privacidade</a>
-            <a href="/admin" className="inline-flex items-center gap-1 text-xs text-white/20 hover:text-white/40 transition-colors" data-testid="link-admin">
+            <a href="#" className="text-xs text-white/60" data-testid="link-termos">Termos de Uso</a>
+            <a href="#" className="text-xs text-white/60" data-testid="link-privacidade">Privacidade</a>
+            <a href="/admin" className="inline-flex items-center gap-1 text-xs text-white/30 hover:text-white/50 transition-colors" data-testid="link-admin">
               <Lock className="w-3 h-3" />
               Admin
             </a>

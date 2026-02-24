@@ -89,7 +89,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   );
 }
 
-function MessageCard({ msg, onMarkRead, onDelete }: { msg: ContactMessage; onMarkRead: () => void; onDelete: () => void }) {
+function MessageCard({ msg, onMarkRead, onMarkUnread, onDelete }: { msg: ContactMessage; onMarkRead: () => void; onMarkUnread: () => void; onDelete: () => void }) {
   const date = new Date(msg.createdAt);
   const formatted = date.toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -122,16 +122,14 @@ function MessageCard({ msg, onMarkRead, onDelete }: { msg: ContactMessage; onMar
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          {!msg.read && (
-            <button
-              onClick={onMarkRead}
-              className="p-2 rounded-md bg-white/[0.05] hover:bg-white/[0.1] text-white/50 hover:text-white transition-colors"
-              title="Marcar como lida"
-              data-testid={`button-mark-read-${msg.id}`}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={msg.read ? onMarkUnread : onMarkRead}
+            className={`p-2 rounded-md bg-white/[0.05] hover:bg-white/[0.1] transition-colors ${msg.read ? "text-white/40 hover:text-[hsl(192,85%,48%)]" : "text-[hsl(192,85%,48%)] hover:text-white"}`}
+            title={msg.read ? "Marcar como nao lida" : "Marcar como lida"}
+            data-testid={`button-mark-read-${msg.id}`}
+          >
+            <Eye className="w-4 h-4" />
+          </button>
           <button
             onClick={onDelete}
             className="p-2 rounded-md bg-white/[0.05] hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-colors"
@@ -179,6 +177,15 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const markReadMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("PATCH", `/api/admin/messages/${id}/read`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/messages"] });
+    },
+  });
+
+  const markUnreadMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("PATCH", `/api/admin/messages/${id}/unread`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/messages"] });
@@ -273,6 +280,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                 key={msg.id}
                 msg={msg}
                 onMarkRead={() => markReadMutation.mutate(msg.id)}
+                onMarkUnread={() => markUnreadMutation.mutate(msg.id)}
                 onDelete={() => deleteMutation.mutate(msg.id)}
               />
             ))}
