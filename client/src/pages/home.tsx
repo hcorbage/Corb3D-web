@@ -360,6 +360,7 @@ function ServicesSection() {
 }
 
 function AboutSection() {
+  const [, setLocation] = useLocation();
   return (
     <section id="sobre" className="py-24 bg-[#080c14] relative" data-testid="section-sobre">
       <div className="absolute inset-0 pointer-events-none">
