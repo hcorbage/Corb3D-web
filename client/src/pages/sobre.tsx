@@ -113,10 +113,10 @@ export default function Sobre() {
   const hasContent = content || images.length > 0;
 
   return (
-    <div className="bg-[#0a0e17] min-h-screen text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div className="bg-[#0a0e17] min-h-screen text-white flex flex-col" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
       <Navbar />
 
-      <section className="relative pt-32 pb-24 overflow-hidden">
+      <section className="relative pt-32 pb-24 overflow-hidden flex-1">
         <div className="absolute inset-0 pointer-events-none">
           <img src="/images/bg-about.png" alt="" className="w-full h-full object-cover opacity-[0.07]" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e17] via-transparent to-[#0a0e17]" />
