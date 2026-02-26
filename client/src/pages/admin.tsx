@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Lock, Mail, Trash2, Eye, LogOut, ArrowLeft, Clock, User, Phone, Briefcase } from "lucide-react";
-import type { ContactMessage } from "@shared/schema";
+import { Lock, Mail, Trash2, Eye, LogOut, ArrowLeft, Clock, Phone, Briefcase, Image, Upload, Plus, X, Edit2, Check } from "lucide-react";
+import type { ContactMessage, PortfolioItem } from "@shared/schema";
 
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
+const CYAN_BG = "bg-[hsl(192,85%,48%)]";
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -169,7 +170,7 @@ function MessageCard({ msg, onMarkRead, onMarkUnread, onDelete }: { msg: Contact
   );
 }
 
-function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+function MessagesTab() {
   const { data: messages, isLoading } = useQuery<ContactMessage[]>({
     queryKey: ["/api/admin/messages"],
   });
@@ -201,6 +202,413 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     },
   });
 
+  const unreadCount = messages?.filter((m) => !m.read).length || 0;
+  const totalCount = messages?.length || 0;
+
+  return (
+    <>
+      <div className="flex items-center gap-4 mb-8 flex-wrap">
+        <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-total">
+          <Mail className="w-5 h-5 text-white/60" />
+          <div>
+            <p className="text-2xl font-bold text-white">{totalCount}</p>
+            <p className="text-xs text-white/60">Total</p>
+          </div>
+        </Card>
+        <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-unread">
+          <div className="w-2 h-2 rounded-full bg-[hsl(192,85%,48%)]" />
+          <div>
+            <p className={`text-2xl font-bold ${CYAN_CLASS}`}>{unreadCount}</p>
+            <p className="text-xs text-white/60">Nao lidas</p>
+          </div>
+        </Card>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="bg-white/[0.03] border-white/[0.06] p-5 animate-pulse">
+              <div className="h-4 bg-white/10 rounded w-1/3 mb-3" />
+              <div className="h-3 bg-white/5 rounded w-1/2 mb-2" />
+              <div className="h-3 bg-white/5 rounded w-full" />
+            </Card>
+          ))}
+        </div>
+      ) : messages && messages.length > 0 ? (
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <MessageCard
+              key={msg.id}
+              msg={msg}
+              onMarkRead={() => markReadMutation.mutate(msg.id)}
+              onMarkUnread={() => markUnreadMutation.mutate(msg.id)}
+              onDelete={() => deleteMutation.mutate(msg.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="bg-white/[0.03] border-white/[0.06] p-12 text-center" data-testid="card-no-messages">
+          <Mail className="w-12 h-12 text-white/20 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-white/80 mb-2">Nenhuma mensagem</h3>
+          <p className="text-sm text-white/60">As mensagens enviadas pelo formulario de contato aparecerao aqui.</p>
+        </Card>
+      )}
+    </>
+  );
+}
+
+function PortfolioUploadForm({ onClose }: { onClose: () => void }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("Geral");
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      if (!file) throw new Error("Selecione uma imagem");
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("title", title || "Sem titulo");
+      formData.append("description", description);
+      formData.append("category", category);
+
+      const res = await fetch("/api/admin/portfolio", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Erro ao enviar");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
+      onClose();
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) {
+      setFile(selected);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result as string);
+      reader.readAsDataURL(selected);
+    }
+  };
+
+  return (
+    <Card className="bg-white/[0.03] border-white/[0.06] p-6 mb-6" data-testid="card-upload-form">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-base font-semibold text-white">Nova foto do portfolio</h3>
+        <button onClick={onClose} className="p-1 text-white/40 hover:text-white/70 transition-colors" data-testid="button-close-upload">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center cursor-pointer hover:border-[hsl(192,85%,48%)]/30 transition-colors"
+          data-testid="dropzone-image"
+        >
+          {preview ? (
+            <div className="relative">
+              <img src={preview} alt="Preview" className="max-h-48 mx-auto rounded-md object-contain" />
+              <p className="text-xs text-white/50 mt-2">Clique para trocar a imagem</p>
+            </div>
+          ) : (
+            <>
+              <Upload className="w-10 h-10 text-white/20 mx-auto mb-3" />
+              <p className="text-sm text-white/60 mb-1">Clique para selecionar uma imagem</p>
+              <p className="text-xs text-white/30">JPG, PNG, GIF ou WebP (max 10MB)</p>
+            </>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            onChange={handleFileChange}
+            className="hidden"
+            data-testid="input-file-upload"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-white/70 mb-1.5 block">Titulo</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+            placeholder="Nome do projeto"
+            data-testid="input-portfolio-title"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-white/70 mb-1.5 block">Descricao (opcional)</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors resize-none"
+            placeholder="Breve descricao do projeto..."
+            data-testid="input-portfolio-description"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs text-white/70 mb-1.5 block">Categoria</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+            data-testid="select-portfolio-category"
+          >
+            <option value="Geral" className="bg-[#0a0e17]">Geral</option>
+            <option value="Prototipagem" className="bg-[#0a0e17]">Prototipagem</option>
+            <option value="Producao em Serie" className="bg-[#0a0e17]">Producao em Serie</option>
+            <option value="Modelagem 3D" className="bg-[#0a0e17]">Modelagem 3D</option>
+            <option value="Pecas Funcionais" className="bg-[#0a0e17]">Pecas Funcionais</option>
+            <option value="Decorativo" className="bg-[#0a0e17]">Decorativo</option>
+          </select>
+        </div>
+
+        {uploadMutation.isError && (
+          <p className="text-sm text-red-400" data-testid="text-upload-error">
+            {(uploadMutation.error as Error).message || "Erro ao enviar imagem"}
+          </p>
+        )}
+
+        <Button
+          onClick={() => uploadMutation.mutate()}
+          disabled={!file || uploadMutation.isPending}
+          className="w-full font-semibold"
+          data-testid="button-submit-portfolio"
+        >
+          {uploadMutation.isPending ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+              Enviando...
+            </>
+          ) : (
+            <>
+              <Upload className="w-4 h-4 mr-2" />
+              Enviar foto
+            </>
+          )}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function PortfolioItemCard({ item, onDelete }: { item: PortfolioItem; onDelete: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(item.title);
+  const [category, setCategory] = useState(item.category);
+
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("PATCH", `/api/admin/portfolio/${item.id}`, { title, category });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
+      setEditing(false);
+    },
+  });
+
+  const date = new Date(item.createdAt);
+  const formatted = date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return (
+    <Card className="bg-white/[0.03] border-white/[0.06] overflow-hidden" data-testid={`card-portfolio-${item.id}`}>
+      <div className="aspect-[4/3] bg-white/[0.02] relative overflow-hidden">
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          data-testid={`img-portfolio-${item.id}`}
+        />
+      </div>
+      <div className="p-4">
+        {editing ? (
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full bg-white/[0.05] border border-white/[0.08] rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[hsl(192,85%,48%)]/40"
+              data-testid={`input-edit-title-${item.id}`}
+            />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full bg-white/[0.05] border border-white/[0.08] rounded px-3 py-1.5 text-sm text-white focus:outline-none"
+              data-testid={`select-edit-category-${item.id}`}
+            >
+              <option value="Geral" className="bg-[#0a0e17]">Geral</option>
+              <option value="Prototipagem" className="bg-[#0a0e17]">Prototipagem</option>
+              <option value="Producao em Serie" className="bg-[#0a0e17]">Producao em Serie</option>
+              <option value="Modelagem 3D" className="bg-[#0a0e17]">Modelagem 3D</option>
+              <option value="Pecas Funcionais" className="bg-[#0a0e17]">Pecas Funcionais</option>
+              <option value="Decorativo" className="bg-[#0a0e17]">Decorativo</option>
+            </select>
+            <div className="flex gap-2">
+              <button
+                onClick={() => updateMutation.mutate()}
+                disabled={updateMutation.isPending}
+                className={`flex-1 p-1.5 rounded text-sm font-medium ${CYAN_BG} text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-1`}
+                data-testid={`button-save-edit-${item.id}`}
+              >
+                <Check className="w-3.5 h-3.5" /> Salvar
+              </button>
+              <button
+                onClick={() => { setEditing(false); setTitle(item.title); setCategory(item.category); }}
+                className="flex-1 p-1.5 rounded text-sm text-white/60 bg-white/[0.05] hover:bg-white/[0.1] transition-colors"
+                data-testid={`button-cancel-edit-${item.id}`}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-xs text-[hsl(192,85%,50%)]/60 mb-1">{item.category}</p>
+            <h3 className="text-sm font-semibold text-white/90 mb-1" data-testid={`text-portfolio-title-${item.id}`}>
+              {item.title}
+            </h3>
+            {item.description && (
+              <p className="text-xs text-white/50 mb-2 line-clamp-2">{item.description}</p>
+            )}
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
+              <span className="text-xs text-white/40">{formatted}</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setEditing(true)}
+                  className="p-1.5 rounded bg-white/[0.05] hover:bg-white/[0.1] text-white/50 hover:text-white/80 transition-colors"
+                  title="Editar"
+                  data-testid={`button-edit-portfolio-${item.id}`}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="p-1.5 rounded bg-white/[0.05] hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-colors"
+                  title="Excluir"
+                  data-testid={`button-delete-portfolio-${item.id}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function PortfolioTab() {
+  const [showUpload, setShowUpload] = useState(false);
+
+  const { data: items, isLoading } = useQuery<PortfolioItem[]>({
+    queryKey: ["/api/admin/portfolio"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/admin/portfolio/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/portfolio"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/portfolio"] });
+    },
+  });
+
+  const totalItems = items?.length || 0;
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-portfolio">
+            <Image className="w-5 h-5 text-white/60" />
+            <div>
+              <p className="text-2xl font-bold text-white">{totalItems}</p>
+              <p className="text-xs text-white/60">Fotos</p>
+            </div>
+          </Card>
+        </div>
+        {!showUpload && (
+          <Button
+            onClick={() => setShowUpload(true)}
+            className="font-semibold"
+            data-testid="button-add-portfolio"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Adicionar foto
+          </Button>
+        )}
+      </div>
+
+      {showUpload && (
+        <PortfolioUploadForm onClose={() => setShowUpload(false)} />
+      )}
+
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="bg-white/[0.03] border-white/[0.06] animate-pulse">
+              <div className="aspect-[4/3] bg-white/[0.05]" />
+              <div className="p-4 space-y-2">
+                <div className="h-3 bg-white/10 rounded w-1/3" />
+                <div className="h-4 bg-white/5 rounded w-2/3" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : items && items.length > 0 ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item) => (
+            <PortfolioItemCard
+              key={item.id}
+              item={item}
+              onDelete={() => deleteMutation.mutate(item.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="bg-white/[0.03] border-white/[0.06] p-12 text-center" data-testid="card-no-portfolio">
+          <Image className="w-12 h-12 text-white/20 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-white/80 mb-2">Nenhuma foto no portfolio</h3>
+          <p className="text-sm text-white/60 mb-4">Adicione fotos dos seus projetos para exibir na pagina de portfolio.</p>
+          {!showUpload && (
+            <Button onClick={() => setShowUpload(true)} className="font-semibold" data-testid="button-add-first-portfolio">
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar primeira foto
+            </Button>
+          )}
+        </Card>
+      )}
+    </>
+  );
+}
+
+function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+  const [activeTab, setActiveTab] = useState<"messages" | "portfolio">("messages");
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", "/api/admin/logout");
@@ -210,13 +618,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     },
   });
 
-  const unreadCount = messages?.filter((m) => !m.read).length || 0;
-  const totalCount = messages?.length || 0;
-
   return (
     <div className="min-h-screen bg-[#0a0e17] text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
       <header className="border-b border-white/[0.06] bg-[#060a12]">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <a href="/" data-testid="link-admin-home">
               <img
@@ -229,7 +634,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               <h1 className="text-lg font-bold text-white" data-testid="text-admin-title">
                 CORB<span className={CYAN_CLASS}>3D</span> Admin
               </h1>
-              <p className="text-xs text-white/60">Mensagens de contato</p>
+              <p className="text-xs text-white/60">Painel de gerenciamento</p>
             </div>
           </div>
           <Button
@@ -245,53 +650,39 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-8">
-        <div className="flex items-center gap-4 mb-8 flex-wrap">
-          <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-total">
-            <Mail className="w-5 h-5 text-white/60" />
-            <div>
-              <p className="text-2xl font-bold text-white">{totalCount}</p>
-              <p className="text-xs text-white/60">Total</p>
-            </div>
-          </Card>
-          <Card className="bg-white/[0.03] border-white/[0.06] px-5 py-3 flex items-center gap-3" data-testid="card-stat-unread">
-            <div className="w-2 h-2 rounded-full bg-[hsl(192,85%,48%)]" />
-            <div>
-              <p className={`text-2xl font-bold ${CYAN_CLASS}`}>{unreadCount}</p>
-              <p className="text-xs text-white/60">Nao lidas</p>
-            </div>
-          </Card>
+      <div className="border-b border-white/[0.06] bg-[#060a12]/50">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setActiveTab("messages")}
+              className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "messages"
+                  ? "border-[hsl(192,85%,48%)] text-white"
+                  : "border-transparent text-white/50 hover:text-white/70"
+              }`}
+              data-testid="tab-messages"
+            >
+              <Mail className="w-4 h-4 inline-block mr-2 -mt-0.5" />
+              Mensagens
+            </button>
+            <button
+              onClick={() => setActiveTab("portfolio")}
+              className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "portfolio"
+                  ? "border-[hsl(192,85%,48%)] text-white"
+                  : "border-transparent text-white/50 hover:text-white/70"
+              }`}
+              data-testid="tab-portfolio"
+            >
+              <Image className="w-4 h-4 inline-block mr-2 -mt-0.5" />
+              Portfolio
+            </button>
+          </div>
         </div>
+      </div>
 
-        {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-white/[0.03] border-white/[0.06] p-5 animate-pulse">
-                <div className="h-4 bg-white/10 rounded w-1/3 mb-3" />
-                <div className="h-3 bg-white/5 rounded w-1/2 mb-2" />
-                <div className="h-3 bg-white/5 rounded w-full" />
-              </Card>
-            ))}
-          </div>
-        ) : messages && messages.length > 0 ? (
-          <div className="space-y-4">
-            {messages.map((msg) => (
-              <MessageCard
-                key={msg.id}
-                msg={msg}
-                onMarkRead={() => markReadMutation.mutate(msg.id)}
-                onMarkUnread={() => markUnreadMutation.mutate(msg.id)}
-                onDelete={() => deleteMutation.mutate(msg.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <Card className="bg-white/[0.03] border-white/[0.06] p-12 text-center" data-testid="card-no-messages">
-            <Mail className="w-12 h-12 text-white/20 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white/80 mb-2">Nenhuma mensagem</h3>
-            <p className="text-sm text-white/60">As mensagens enviadas pelo formulario de contato aparecerao aqui.</p>
-          </Card>
-        )}
+      <main className="max-w-5xl mx-auto px-6 py-8">
+        {activeTab === "messages" ? <MessagesTab /> : <PortfolioTab />}
       </main>
     </div>
   );

@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type ContactMessage, type InsertContactMessage, contactMessages, users } from "@shared/schema";
+import { type User, type InsertUser, type ContactMessage, type InsertContactMessage, type PortfolioItem, type InsertPortfolioItem, contactMessages, users, portfolioItems } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -11,6 +11,10 @@ export interface IStorage {
   markMessageRead(id: number): Promise<void>;
   markMessageUnread(id: number): Promise<void>;
   deleteMessage(id: number): Promise<void>;
+  getPortfolioItems(): Promise<PortfolioItem[]>;
+  createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
+  updatePortfolioItem(id: number, data: Partial<InsertPortfolioItem>): Promise<PortfolioItem | undefined>;
+  deletePortfolioItem(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -48,6 +52,24 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMessage(id: number): Promise<void> {
     await db.delete(contactMessages).where(eq(contactMessages.id, id));
+  }
+
+  async getPortfolioItems(): Promise<PortfolioItem[]> {
+    return db.select().from(portfolioItems).orderBy(desc(portfolioItems.createdAt));
+  }
+
+  async createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem> {
+    const [created] = await db.insert(portfolioItems).values(item).returning();
+    return created;
+  }
+
+  async updatePortfolioItem(id: number, data: Partial<InsertPortfolioItem>): Promise<PortfolioItem | undefined> {
+    const [updated] = await db.update(portfolioItems).set(data).where(eq(portfolioItems.id, id)).returning();
+    return updated;
+  }
+
+  async deletePortfolioItem(id: number): Promise<void> {
+    await db.delete(portfolioItems).where(eq(portfolioItems.id, id));
   }
 }
 

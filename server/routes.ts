@@ -1,11 +1,41 @@
 import type { Express } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
-import { insertContactMessageSchema } from "@shared/schema";
+import { insertContactMessageSchema, insertPortfolioItemSchema } from "@shared/schema";
+import { z } from "zod";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const ext = path.extname(file.originalname);
+      cb(null, uniqueSuffix + ext);
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowedExt = /\.(jpg|jpeg|png|gif|webp)$/i;
+    const allowedMime = /^image\/(jpeg|png|gif|webp)$/;
+    if (allowedExt.test(path.extname(file.originalname)) && allowedMime.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Apenas imagens (jpg, png, gif, webp) sao permitidas"));
+    }
+  },
+});
 
 const scryptAsync = promisify(scrypt);
 
@@ -142,6 +172,110 @@ export async function registerRoutes(
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
     storage.deleteMessage(id).then(() => res.json({ ok: true }));
+  });
+
+  app.use("/uploads", (await import("express")).default.static(uploadsDir));
+
+  app.get("/api/portfolio", async (_req, res) => {
+    try {
+      const items = await storage.getPortfolioItems();
+      return res.json(items);
+    } catch (error) {
+      console.error("Error fetching portfolio:", error);
+      return res.status(500).json({ message: "Erro ao buscar portfolio" });
+    }
+  });
+
+  app.get("/api/admin/portfolio", async (req, res) => {
+    if (!req.session.isAdmin) {
+      return res.status(401).json({ message: "Nao autorizado" });
+    }
+    try {
+      const items = await storage.getPortfolioItems();
+      return res.json(items);
+    } catch (error) {
+      console.error("Error fetching admin portfolio:", error);
+      return res.status(500).json({ message: "Erro ao buscar portfolio" });
+    }
+  });
+
+  app.post("/api/admin/portfolio", (req, res, next) => {
+    if (!req.session.isAdmin) {
+      return res.status(401).json({ message: "Nao autorizado" });
+    }
+    next();
+  }, upload.single("image"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Imagem obrigatoria" });
+      }
+      const imageUrl = `/uploads/${req.file.filename}`;
+      const title = req.body.title || "Sem titulo";
+      const description = req.body.description || null;
+      const category = req.body.category || "Geral";
+
+      const item = await storage.createPortfolioItem({
+        title,
+        description,
+        category,
+        imageUrl,
+      });
+      return res.status(201).json(item);
+    } catch (error) {
+      console.error("Error creating portfolio item:", error);
+      return res.status(500).json({ message: "Erro ao salvar item" });
+    }
+  });
+
+  const updatePortfolioSchema = z.object({
+    title: z.string().min(1).optional(),
+    category: z.string().min(1).optional(),
+    description: z.string().nullable().optional(),
+  });
+
+  app.patch("/api/admin/portfolio/:id", (req, res, next) => {
+    if (!req.session.isAdmin) {
+      return res.status(401).json({ message: "Nao autorizado" });
+    }
+    next();
+  }, async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
+    try {
+      const parsed = updatePortfolioSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.flatten() });
+      }
+      const updated = await storage.updatePortfolioItem(id, parsed.data);
+      if (!updated) return res.status(404).json({ message: "Item nao encontrado" });
+      return res.json(updated);
+    } catch (error) {
+      console.error("Error updating portfolio item:", error);
+      return res.status(500).json({ message: "Erro ao atualizar item" });
+    }
+  });
+
+  app.delete("/api/admin/portfolio/:id", async (req, res) => {
+    if (!req.session.isAdmin) {
+      return res.status(401).json({ message: "Nao autorizado" });
+    }
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
+    try {
+      const items = await storage.getPortfolioItems();
+      const item = items.find(i => i.id === id);
+      if (item) {
+        const filePath = path.join(uploadsDir, path.basename(item.imageUrl));
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+      await storage.deletePortfolioItem(id);
+      return res.json({ ok: true });
+    } catch (error) {
+      console.error("Error deleting portfolio item:", error);
+      return res.status(500).json({ message: "Erro ao excluir item" });
+    }
   });
 
   return httpServer;

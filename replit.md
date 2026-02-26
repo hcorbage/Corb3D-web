@@ -6,9 +6,15 @@ Corb3D is a professional 3D printing services website built as a full-stack Type
 
 ### Admin Dashboard
 - **Route**: `/admin` — login-protected admin area
-- **Auth**: Session-based with express-session + connect-pg-simple, username "admin", password from ADMIN_PASSWORD env var
-- **Features**: View contact messages, mark as read, delete messages
+- **Auth**: Session-based with express-session + connect-pg-simple, username "hcorbage", password from ADMIN_PASSWORD env var
+- **Features**: Two tabs — Messages (view, mark read/unread, delete) and Portfolio (upload photos, edit title/category, delete)
+- **Portfolio Upload**: Uses multer for file uploads, images saved to `uploads/` directory, served at `/uploads/` path
 - **Footer link**: Small "Admin" link in the site footer
+
+### Portfolio
+- **Route**: `/portfolio` — public portfolio page showing uploaded project photos
+- **Data**: Fetched from `portfolio_items` table via `/api/portfolio` endpoint
+- **Admin management**: Upload, edit, delete photos from admin dashboard Portfolio tab
 
 ## User Preferences
 
