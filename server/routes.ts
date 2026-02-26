@@ -328,6 +328,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/settings/business-hours", async (_req, res) => {
+    try {
+      const hours = await storage.getSetting("business_hours");
+      return res.json({ business_hours: hours || "" });
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao buscar horario" });
+    }
+  });
+
   app.get("/api/settings/about", async (_req, res) => {
     try {
       const aboutKeys = ["about_title", "about_content", "about_image_1", "about_image_2", "about_image_3"];
@@ -361,9 +370,12 @@ export async function registerRoutes(
 
   app.put("/api/admin/settings", requireAdmin, aboutUpload, async (req, res) => {
     try {
-      const { whatsapp_number, about_title, about_content } = req.body;
+      const { whatsapp_number, about_title, about_content, business_hours } = req.body;
       if (typeof whatsapp_number === "string") {
         await storage.setSetting("whatsapp_number", whatsapp_number);
+      }
+      if (typeof business_hours === "string") {
+        await storage.setSetting("business_hours", business_hours);
       }
       if (typeof about_title === "string") {
         await storage.setSetting("about_title", about_title);

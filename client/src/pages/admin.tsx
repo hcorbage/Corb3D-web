@@ -412,6 +412,7 @@ function PortfolioTab() {
 function SettingsTab() {
   const { data: settings, isLoading } = useQuery<Record<string, string>>({ queryKey: ["/api/admin/settings"] });
   const [whatsapp, setWhatsapp] = useState("");
+  const [businessHours, setBusinessHours] = useState("");
   const [aboutTitle, setAboutTitle] = useState("");
   const [aboutContent, setAboutContent] = useState("");
   const [aboutImages, setAboutImages] = useState<{ [key: string]: string }>({});
@@ -426,6 +427,7 @@ function SettingsTab() {
 
   if (settings && !initialized) {
     setWhatsapp(settings.whatsapp_number || "");
+    setBusinessHours(settings.business_hours || "");
     setAboutTitle(settings.about_title || "");
     setAboutContent(settings.about_content || "");
     setAboutImages({
@@ -457,6 +459,7 @@ function SettingsTab() {
     mutationFn: async () => {
       const formData = new FormData();
       formData.append("whatsapp_number", whatsapp);
+      formData.append("business_hours", businessHours);
       formData.append("about_title", aboutTitle);
       formData.append("about_content", aboutContent);
       for (const key of ["about_image_1", "about_image_2", "about_image_3"]) {
@@ -471,6 +474,7 @@ function SettingsTab() {
       setRemovedImages(new Set());
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/settings/whatsapp"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/business-hours"] });
       queryClient.invalidateQueries({ queryKey: ["/api/settings/about"] });
       setInitialized(false);
     },
@@ -492,6 +496,13 @@ function SettingsTab() {
               className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
               placeholder="5511999999999" data-testid="input-whatsapp-number" />
             <p className="text-[11px] text-white/30 mt-1.5">Deixe vazio para desativar o botao flutuante de WhatsApp no site.</p>
+          </div>
+          <div>
+            <label className="text-xs text-white/70 mb-1.5 block">Horario de Atendimento</label>
+            <input type="text" value={businessHours} onChange={(e) => setBusinessHours(e.target.value)}
+              className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+              placeholder="Seg a Sex, 8h as 18h" data-testid="input-business-hours" />
+            <p className="text-[11px] text-white/30 mt-1.5">Exibido na secao de contato com icone de relogio.</p>
           </div>
         </div>
       </Card>

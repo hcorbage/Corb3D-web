@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { SiInstagram } from "react-icons/si";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 const CYAN = "hsl(192 85% 50%)";
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
@@ -504,6 +505,32 @@ function DifferentialsSection() {
   );
 }
 
+function BusinessHoursCard() {
+  const { data } = useQuery<{ business_hours: string }>({
+    queryKey: ["/api/settings/business-hours"],
+    queryFn: async () => {
+      const res = await fetch("/api/settings/business-hours");
+      if (!res.ok) return { business_hours: "" };
+      return res.json();
+    },
+  });
+  const hours = data?.business_hours || "Seg a Sex, 8h as 18h";
+
+  return (
+    <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-phone-info">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-md bg-[hsl(192,85%,48%)]/10 flex items-center justify-center">
+          <Clock className={`w-6 h-6 ${CYAN_CLASS}`} />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-white">Horario de Atendimento</h3>
+          <p className="text-xs text-white/60 mt-1" data-testid="text-business-hours">{hours}</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function CTASection() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", service: "", message: "" });
   const [sent, setSent] = useState(false);
@@ -720,17 +747,7 @@ function CTASection() {
               </Card>
             </a>
 
-            <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-phone-info">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-md bg-[hsl(192,85%,48%)]/10 flex items-center justify-center">
-                  <Phone className={`w-6 h-6 ${CYAN_CLASS}`} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white">Horario de Atendimento</h3>
-                  <p className="text-xs text-white/60 mt-1">Seg a Sex, 8h as 18h</p>
-                </div>
-              </div>
-            </Card>
+            <BusinessHoursCard />
           </motion.div>
         </motion.div>
       </div>
