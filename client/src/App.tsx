@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Portfolio from "@/pages/portfolio";
+import Sobre from "@/pages/sobre";
 import Admin from "@/pages/admin";
 import WhatsAppButton from "@/components/whatsapp-button";
 
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/portfolio" component={Portfolio} />
+      <Route path="/sobre" component={Sobre} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>

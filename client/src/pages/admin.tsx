@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Lock, Mail, Trash2, Eye, LogOut, ArrowLeft, Clock, Phone, Briefcase, Image, Upload, Plus, X, Edit2, Check, Settings } from "lucide-react";
+import { Lock, Mail, Trash2, Eye, LogOut, ArrowLeft, Clock, Phone, Briefcase, Image, Upload, Plus, X, Edit2, Check, Settings, ImagePlus } from "lucide-react";
 import type { ContactMessage, PortfolioItemWithImages } from "@shared/schema";
 
 const CYAN_CLASS = "text-[hsl(192,85%,50%)]";
@@ -412,18 +412,67 @@ function PortfolioTab() {
 function SettingsTab() {
   const { data: settings, isLoading } = useQuery<Record<string, string>>({ queryKey: ["/api/admin/settings"] });
   const [whatsapp, setWhatsapp] = useState("");
+  const [aboutTitle, setAboutTitle] = useState("");
+  const [aboutContent, setAboutContent] = useState("");
+  const [aboutImages, setAboutImages] = useState<{ [key: string]: string }>({});
+  const [newImages, setNewImages] = useState<{ [key: string]: File }>({});
+  const [removedImages, setRemovedImages] = useState<Set<string>>(new Set());
   const [initialized, setInitialized] = useState(false);
+  const fileInputRefs = {
+    about_image_1: useRef<HTMLInputElement>(null),
+    about_image_2: useRef<HTMLInputElement>(null),
+    about_image_3: useRef<HTMLInputElement>(null),
+  };
 
   if (settings && !initialized) {
     setWhatsapp(settings.whatsapp_number || "");
+    setAboutTitle(settings.about_title || "");
+    setAboutContent(settings.about_content || "");
+    setAboutImages({
+      about_image_1: settings.about_image_1 || "",
+      about_image_2: settings.about_image_2 || "",
+      about_image_3: settings.about_image_3 || "",
+    });
     setInitialized(true);
   }
 
+  const handleImageSelect = useCallback((key: string, file: File) => {
+    setNewImages(prev => ({ ...prev, [key]: file }));
+    setRemovedImages(prev => { const next = new Set(prev); next.delete(key); return next; });
+  }, []);
+
+  const handleImageRemove = useCallback((key: string) => {
+    setNewImages(prev => { const next = { ...prev }; delete next[key]; return next; });
+    setRemovedImages(prev => new Set(prev).add(key));
+    setAboutImages(prev => ({ ...prev, [key]: "" }));
+  }, []);
+
+  const getImagePreview = useCallback((key: string) => {
+    if (newImages[key]) return URL.createObjectURL(newImages[key]);
+    if (removedImages.has(key)) return "";
+    return aboutImages[key] || "";
+  }, [newImages, removedImages, aboutImages]);
+
   const saveMutation = useMutation({
-    mutationFn: async () => { await apiRequest("PUT", "/api/admin/settings", { whatsapp_number: whatsapp }); },
+    mutationFn: async () => {
+      const formData = new FormData();
+      formData.append("whatsapp_number", whatsapp);
+      formData.append("about_title", aboutTitle);
+      formData.append("about_content", aboutContent);
+      for (const key of ["about_image_1", "about_image_2", "about_image_3"]) {
+        if (newImages[key]) formData.append(key, newImages[key]);
+        if (removedImages.has(key)) formData.append(`remove_${key}`, "true");
+      }
+      const res = await fetch("/api/admin/settings", { method: "PUT", body: formData, credentials: "include" });
+      if (!res.ok) throw new Error("Erro ao salvar");
+    },
     onSuccess: () => {
+      setNewImages({});
+      setRemovedImages(new Set());
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
       queryClient.invalidateQueries({ queryKey: ["/api/settings/whatsapp"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/about"] });
+      setInitialized(false);
     },
   });
 
@@ -432,23 +481,97 @@ function SettingsTab() {
   }
 
   return (
-    <Card className="bg-white/[0.03] border-white/[0.06] p-6 max-w-lg" data-testid="card-settings">
-      <h3 className="text-base font-semibold text-white mb-6">Configuracoes do site</h3>
-      <div className="space-y-6">
-        <div>
-          <label className="text-xs text-white/70 mb-1.5 block">Numero do WhatsApp</label>
-          <p className="text-[11px] text-white/40 mb-2">Formato internacional com DDI. Ex: 5511999999999</p>
-          <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
-            className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
-            placeholder="5511999999999" data-testid="input-whatsapp-number" />
-          <p className="text-[11px] text-white/30 mt-1.5">Deixe vazio para desativar o botao flutuante de WhatsApp no site.</p>
+    <div className="space-y-6 max-w-2xl">
+      <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-settings">
+        <h3 className="text-base font-semibold text-white mb-6">Configuracoes do site</h3>
+        <div className="space-y-6">
+          <div>
+            <label className="text-xs text-white/70 mb-1.5 block">Numero do WhatsApp</label>
+            <p className="text-[11px] text-white/40 mb-2">Formato internacional com DDI. Ex: 5511999999999</p>
+            <input type="text" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+              className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+              placeholder="5511999999999" data-testid="input-whatsapp-number" />
+            <p className="text-[11px] text-white/30 mt-1.5">Deixe vazio para desativar o botao flutuante de WhatsApp no site.</p>
+          </div>
         </div>
+      </Card>
+
+      <Card className="bg-white/[0.03] border-white/[0.06] p-6" data-testid="card-about-settings">
+        <h3 className="text-base font-semibold text-white mb-2">Conheca Nossa Historia</h3>
+        <p className="text-xs text-white/40 mb-6">Configure o conteudo da pagina "Sobre" que aparece ao clicar em "Conheca Nossa Historia".</p>
+        <div className="space-y-5">
+          <div>
+            <label className="text-xs text-white/70 mb-1.5 block">Titulo</label>
+            <input type="text" value={aboutTitle} onChange={(e) => setAboutTitle(e.target.value)}
+              className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors"
+              placeholder="Nossa Historia" data-testid="input-about-title" />
+          </div>
+          <div>
+            <label className="text-xs text-white/70 mb-1.5 block">Texto</label>
+            <p className="text-[11px] text-white/40 mb-2">Conte a historia da Corb3D. Use linhas em branco para separar paragrafos.</p>
+            <textarea value={aboutContent} onChange={(e) => setAboutContent(e.target.value)}
+              rows={8}
+              className="w-full bg-white/[0.05] border border-white/[0.08] rounded-md px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[hsl(192,85%,48%)]/40 transition-colors resize-y"
+              placeholder="Escreva aqui a historia da sua empresa..."
+              data-testid="input-about-content" />
+          </div>
+          <div>
+            <label className="text-xs text-white/70 mb-3 block">Imagens (ate 3)</label>
+            <div className="grid grid-cols-3 gap-3">
+              {(["about_image_1", "about_image_2", "about_image_3"] as const).map((key, idx) => {
+                const preview = getImagePreview(key);
+                return (
+                  <div key={key} className="relative">
+                    <input
+                      ref={fileInputRefs[key]}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      data-testid={`input-${key}`}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageSelect(key, file);
+                      }}
+                    />
+                    {preview ? (
+                      <div className="relative group rounded-lg overflow-hidden aspect-square">
+                        <img src={preview} alt={`Imagem ${idx + 1}`} className="w-full h-full object-cover" data-testid={`img-preview-${key}`} />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button onClick={() => fileInputRefs[key].current?.click()}
+                            className="p-2 rounded-full bg-white/20 hover:bg-white/30 text-white" data-testid={`button-change-${key}`}>
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleImageRemove(key)}
+                            className="p-2 rounded-full bg-red-500/50 hover:bg-red-500/70 text-white" data-testid={`button-remove-${key}`}>
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => fileInputRefs[key].current?.click()}
+                        className="w-full aspect-square rounded-lg border-2 border-dashed border-white/10 hover:border-white/20 bg-white/[0.02] flex flex-col items-center justify-center gap-1.5 transition-colors"
+                        data-testid={`button-add-${key}`}
+                      >
+                        <ImagePlus className="w-6 h-6 text-white/20" />
+                        <span className="text-[10px] text-white/30">Imagem {idx + 1}</span>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div className="flex items-center gap-4">
         <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="font-semibold" data-testid="button-save-settings">
-          {saveMutation.isPending ? "Salvando..." : "Salvar configuracoes"}
+          {saveMutation.isPending ? "Salvando..." : "Salvar todas as configuracoes"}
         </Button>
         {saveMutation.isSuccess && <p className="text-sm text-green-400" data-testid="text-settings-saved">Configuracoes salvas com sucesso!</p>}
       </div>
-    </Card>
+    </div>
   );
 }
 

@@ -328,6 +328,20 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/settings/about", async (_req, res) => {
+    try {
+      const aboutKeys = ["about_title", "about_content", "about_image_1", "about_image_2", "about_image_3"];
+      const result: Record<string, string> = {};
+      for (const key of aboutKeys) {
+        const val = await storage.getSetting(key);
+        if (val) result[key] = val;
+      }
+      return res.json(result);
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao buscar dados sobre" });
+    }
+  });
+
   app.get("/api/admin/settings", requireAdmin, async (req, res) => {
     try {
       const settings = await storage.getAllSettings();
@@ -339,12 +353,35 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/admin/settings", requireAdmin, async (req, res) => {
+  const aboutUpload = upload.fields([
+    { name: "about_image_1", maxCount: 1 },
+    { name: "about_image_2", maxCount: 1 },
+    { name: "about_image_3", maxCount: 1 },
+  ]);
+
+  app.put("/api/admin/settings", requireAdmin, aboutUpload, async (req, res) => {
     try {
-      const { whatsapp_number } = req.body;
+      const { whatsapp_number, about_title, about_content } = req.body;
       if (typeof whatsapp_number === "string") {
         await storage.setSetting("whatsapp_number", whatsapp_number);
       }
+      if (typeof about_title === "string") {
+        await storage.setSetting("about_title", about_title);
+      }
+      if (typeof about_content === "string") {
+        await storage.setSetting("about_content", about_content);
+      }
+      const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+      if (files) {
+        for (const key of ["about_image_1", "about_image_2", "about_image_3"] as const) {
+          if (files[key] && files[key].length > 0) {
+            await storage.setSetting(key, `/uploads/${files[key][0].filename}`);
+          }
+        }
+      }
+      if (req.body.remove_about_image_1 === "true") await storage.setSetting("about_image_1", "");
+      if (req.body.remove_about_image_2 === "true") await storage.setSetting("about_image_2", "");
+      if (req.body.remove_about_image_3 === "true") await storage.setSetting("about_image_3", "");
       return res.json({ ok: true });
     } catch (error) {
       return res.status(500).json({ message: "Erro ao salvar configuracoes" });

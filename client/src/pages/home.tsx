@@ -393,7 +393,7 @@ function AboutSection() {
               merece.
             </motion.p>
             <motion.div variants={fadeInUp} custom={4}>
-              <Button className="font-semibold" data-testid="button-conheca-mais">
+              <Button className="font-semibold" data-testid="button-conheca-mais" onClick={() => setLocation("/sobre")}>
                 Conheca Nossa Historia
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
