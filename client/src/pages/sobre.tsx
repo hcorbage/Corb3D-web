@@ -182,12 +182,6 @@ export default function Sobre() {
                 </motion.div>
               )}
 
-              <motion.div variants={fadeInUp} custom={4} className="text-center mt-12">
-                <Button className="font-semibold" data-testid="button-contato-sobre" onClick={() => setLocation("/")}>
-                  Fale Conosco
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
-              </motion.div>
             </motion.div>
           ) : (
             <motion.div
