@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type ContactMessage, type InsertContactMessage, type PortfolioItem, type InsertPortfolioItem, contactMessages, users, portfolioItems } from "@shared/schema";
+import { type User, type InsertUser, type ContactMessage, type InsertContactMessage, type PortfolioItem, type InsertPortfolioItem, type PortfolioImage, type InsertPortfolioImage, type PortfolioItemWithImages, type SiteSetting, contactMessages, users, portfolioItems, portfolioImages, siteSettings } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -12,9 +12,17 @@ export interface IStorage {
   markMessageUnread(id: number): Promise<void>;
   deleteMessage(id: number): Promise<void>;
   getPortfolioItems(): Promise<PortfolioItem[]>;
+  getPortfolioItemsWithImages(): Promise<PortfolioItemWithImages[]>;
+  getPortfolioItemById(id: number): Promise<PortfolioItem | undefined>;
   createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem>;
   updatePortfolioItem(id: number, data: Partial<InsertPortfolioItem>): Promise<PortfolioItem | undefined>;
   deletePortfolioItem(id: number): Promise<void>;
+  getPortfolioImages(portfolioItemId: number): Promise<PortfolioImage[]>;
+  addPortfolioImage(image: InsertPortfolioImage): Promise<PortfolioImage>;
+  deletePortfolioImage(id: number): Promise<void>;
+  getSetting(key: string): Promise<string | null>;
+  setSetting(key: string, value: string): Promise<void>;
+  getAllSettings(): Promise<SiteSetting[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -58,6 +66,20 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(portfolioItems).orderBy(desc(portfolioItems.createdAt));
   }
 
+  async getPortfolioItemsWithImages(): Promise<PortfolioItemWithImages[]> {
+    const items = await this.getPortfolioItems();
+    const allImages = await db.select().from(portfolioImages).orderBy(portfolioImages.displayOrder);
+    return items.map(item => ({
+      ...item,
+      images: allImages.filter(img => img.portfolioItemId === item.id),
+    }));
+  }
+
+  async getPortfolioItemById(id: number): Promise<PortfolioItem | undefined> {
+    const [item] = await db.select().from(portfolioItems).where(eq(portfolioItems.id, id));
+    return item;
+  }
+
   async createPortfolioItem(item: InsertPortfolioItem): Promise<PortfolioItem> {
     const [created] = await db.insert(portfolioItems).values(item).returning();
     return created;
@@ -69,7 +91,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePortfolioItem(id: number): Promise<void> {
+    await db.delete(portfolioImages).where(eq(portfolioImages.portfolioItemId, id));
     await db.delete(portfolioItems).where(eq(portfolioItems.id, id));
+  }
+
+  async getPortfolioImages(portfolioItemId: number): Promise<PortfolioImage[]> {
+    return db.select().from(portfolioImages).where(eq(portfolioImages.portfolioItemId, portfolioItemId)).orderBy(portfolioImages.displayOrder);
+  }
+
+  async addPortfolioImage(image: InsertPortfolioImage): Promise<PortfolioImage> {
+    const [created] = await db.insert(portfolioImages).values(image).returning();
+    return created;
+  }
+
+  async deletePortfolioImage(id: number): Promise<void> {
+    await db.delete(portfolioImages).where(eq(portfolioImages.id, id));
+  }
+
+  async getSetting(key: string): Promise<string | null> {
+    const [setting] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    return setting?.value || null;
+  }
+
+  async setSetting(key: string, value: string): Promise<void> {
+    const existing = await this.getSetting(key);
+    if (existing !== null) {
+      await db.update(siteSettings).set({ value, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+      await db.insert(siteSettings).values({ key, value });
+    }
+  }
+
+  async getAllSettings(): Promise<SiteSetting[]> {
+    return db.select().from(siteSettings);
   }
 }
 

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
-import { insertContactMessageSchema, insertPortfolioItemSchema } from "@shared/schema";
+import { insertContactMessageSchema } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
@@ -62,6 +62,21 @@ if (!ADMIN_PASSWORD_ENV) {
 declare module "express-session" {
   interface SessionData {
     isAdmin: boolean;
+  }
+}
+
+function requireAdmin(req: any, res: any, next: any) {
+  if (!req.session.isAdmin) {
+    return res.status(401).json({ message: "Nao autorizado" });
+  }
+  next();
+}
+
+function deleteFileIfExists(filePath: string) {
+  try {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  } catch (e) {
+    console.error("Error deleting file:", e);
   }
 }
 
@@ -140,35 +155,23 @@ export async function registerRoutes(
     return res.status(401).json({ authenticated: false });
   });
 
-  app.get("/api/admin/messages", (req, res) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
+  app.get("/api/admin/messages", requireAdmin, (req, res) => {
     storage.getContactMessages().then((messages) => res.json(messages));
   });
 
-  app.patch("/api/admin/messages/:id/read", (req, res) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
+  app.patch("/api/admin/messages/:id/read", requireAdmin, (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
     storage.markMessageRead(id).then(() => res.json({ ok: true }));
   });
 
-  app.patch("/api/admin/messages/:id/unread", (req, res) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
+  app.patch("/api/admin/messages/:id/unread", requireAdmin, (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
     storage.markMessageUnread(id).then(() => res.json({ ok: true }));
   });
 
-  app.delete("/api/admin/messages/:id", (req, res) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
+  app.delete("/api/admin/messages/:id", requireAdmin, (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
     storage.deleteMessage(id).then(() => res.json({ ok: true }));
@@ -178,7 +181,7 @@ export async function registerRoutes(
 
   app.get("/api/portfolio", async (_req, res) => {
     try {
-      const items = await storage.getPortfolioItems();
+      const items = await storage.getPortfolioItemsWithImages();
       return res.json(items);
     } catch (error) {
       console.error("Error fetching portfolio:", error);
@@ -186,12 +189,9 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/portfolio", async (req, res) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
+  app.get("/api/admin/portfolio", requireAdmin, async (req, res) => {
     try {
-      const items = await storage.getPortfolioItems();
+      const items = await storage.getPortfolioItemsWithImages();
       return res.json(items);
     } catch (error) {
       console.error("Error fetching admin portfolio:", error);
@@ -199,31 +199,80 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/portfolio", (req, res, next) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
-    next();
-  }, upload.single("image"), async (req, res) => {
+  app.post("/api/admin/portfolio", requireAdmin, upload.array("images", 6), async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ message: "Imagem obrigatoria" });
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "Pelo menos uma imagem obrigatoria" });
       }
-      const imageUrl = `/uploads/${req.file.filename}`;
       const title = req.body.title || "Sem titulo";
       const description = req.body.description || null;
       const category = req.body.category || "Geral";
+      const coverUrl = `/uploads/${files[0].filename}`;
 
       const item = await storage.createPortfolioItem({
         title,
         description,
         category,
-        imageUrl,
+        imageUrl: coverUrl,
       });
-      return res.status(201).json(item);
+
+      for (let i = 0; i < files.length; i++) {
+        await storage.addPortfolioImage({
+          portfolioItemId: item.id,
+          imageUrl: `/uploads/${files[i].filename}`,
+          displayOrder: i,
+        });
+      }
+
+      const fullItem = await storage.getPortfolioItemsWithImages();
+      const created = fullItem.find(x => x.id === item.id);
+      return res.status(201).json(created || item);
     } catch (error) {
       console.error("Error creating portfolio item:", error);
       return res.status(500).json({ message: "Erro ao salvar item" });
+    }
+  });
+
+  app.post("/api/admin/portfolio/:id/images", requireAdmin, upload.single("image"), async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
+    try {
+      if (!req.file) return res.status(400).json({ message: "Imagem obrigatoria" });
+      const existingImages = await storage.getPortfolioImages(id);
+      if (existingImages.length >= 6) {
+        deleteFileIfExists(path.join(uploadsDir, req.file.filename));
+        return res.status(400).json({ message: "Maximo de 6 fotos por album" });
+      }
+      const image = await storage.addPortfolioImage({
+        portfolioItemId: id,
+        imageUrl: `/uploads/${req.file.filename}`,
+        displayOrder: existingImages.length,
+      });
+      return res.status(201).json(image);
+    } catch (error) {
+      console.error("Error adding portfolio image:", error);
+      return res.status(500).json({ message: "Erro ao adicionar imagem" });
+    }
+  });
+
+  app.delete("/api/admin/portfolio/images/:imageId", requireAdmin, async (req, res) => {
+    const imageId = parseInt(req.params.imageId);
+    if (isNaN(imageId)) return res.status(400).json({ message: "ID invalido" });
+    try {
+      const allItems = await storage.getPortfolioItemsWithImages();
+      for (const item of allItems) {
+        const found = item.images.find(img => img.id === imageId);
+        if (found) {
+          deleteFileIfExists(path.join(uploadsDir, path.basename(found.imageUrl)));
+          break;
+        }
+      }
+      await storage.deletePortfolioImage(imageId);
+      return res.json({ ok: true });
+    } catch (error) {
+      console.error("Error deleting portfolio image:", error);
+      return res.status(500).json({ message: "Erro ao excluir imagem" });
     }
   });
 
@@ -233,12 +282,7 @@ export async function registerRoutes(
     description: z.string().nullable().optional(),
   });
 
-  app.patch("/api/admin/portfolio/:id", (req, res, next) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
-    next();
-  }, async (req, res) => {
+  app.patch("/api/admin/portfolio/:id", requireAdmin, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
     try {
@@ -255,26 +299,55 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/portfolio/:id", async (req, res) => {
-    if (!req.session.isAdmin) {
-      return res.status(401).json({ message: "Nao autorizado" });
-    }
+  app.delete("/api/admin/portfolio/:id", requireAdmin, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: "ID invalido" });
     try {
-      const items = await storage.getPortfolioItems();
-      const item = items.find(i => i.id === id);
+      const images = await storage.getPortfolioImages(id);
+      const item = await storage.getPortfolioItemById(id);
+      for (const img of images) {
+        deleteFileIfExists(path.join(uploadsDir, path.basename(img.imageUrl)));
+      }
       if (item) {
-        const filePath = path.join(uploadsDir, path.basename(item.imageUrl));
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
+        deleteFileIfExists(path.join(uploadsDir, path.basename(item.imageUrl)));
       }
       await storage.deletePortfolioItem(id);
       return res.json({ ok: true });
     } catch (error) {
       console.error("Error deleting portfolio item:", error);
       return res.status(500).json({ message: "Erro ao excluir item" });
+    }
+  });
+
+  app.get("/api/settings/whatsapp", async (_req, res) => {
+    try {
+      const number = await storage.getSetting("whatsapp_number");
+      return res.json({ whatsappNumber: number || "" });
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao buscar configuracao" });
+    }
+  });
+
+  app.get("/api/admin/settings", requireAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAllSettings();
+      const obj: Record<string, string> = {};
+      for (const s of settings) obj[s.key] = s.value;
+      return res.json(obj);
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao buscar configuracoes" });
+    }
+  });
+
+  app.put("/api/admin/settings", requireAdmin, async (req, res) => {
+    try {
+      const { whatsapp_number } = req.body;
+      if (typeof whatsapp_number === "string") {
+        await storage.setSetting("whatsapp_number", whatsapp_number);
+      }
+      return res.json({ ok: true });
+    } catch (error) {
+      return res.status(500).json({ message: "Erro ao salvar configuracoes" });
     }
   });
 

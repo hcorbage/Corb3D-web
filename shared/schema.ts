@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, serial, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -55,3 +55,32 @@ export const insertPortfolioItemSchema = createInsertSchema(portfolioItems).omit
 
 export type InsertPortfolioItem = z.infer<typeof insertPortfolioItemSchema>;
 export type PortfolioItem = typeof portfolioItems.$inferSelect;
+
+export const portfolioImages = pgTable("portfolio_images", {
+  id: serial("id").primaryKey(),
+  portfolioItemId: integer("portfolio_item_id").notNull(),
+  imageUrl: text("image_url").notNull(),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertPortfolioImageSchema = createInsertSchema(portfolioImages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPortfolioImage = z.infer<typeof insertPortfolioImageSchema>;
+export type PortfolioImage = typeof portfolioImages.$inferSelect;
+
+export const siteSettings = pgTable("site_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export type SiteSetting = typeof siteSettings.$inferSelect;
+
+export type PortfolioItemWithImages = PortfolioItem & {
+  images: PortfolioImage[];
+};

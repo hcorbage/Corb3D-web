@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Portfolio from "@/pages/portfolio";
 import Admin from "@/pages/admin";
+import WhatsAppButton from "@/components/whatsapp-button";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <WhatsAppButton />
       </TooltipProvider>
     </QueryClientProvider>
   );

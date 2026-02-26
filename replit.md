@@ -7,14 +7,21 @@ Corb3D is a professional 3D printing services website built as a full-stack Type
 ### Admin Dashboard
 - **Route**: `/admin` — login-protected admin area
 - **Auth**: Session-based with express-session + connect-pg-simple, username "hcorbage", password from ADMIN_PASSWORD env var
-- **Features**: Two tabs — Messages (view, mark read/unread, delete) and Portfolio (upload photos, edit title/category, delete)
-- **Portfolio Upload**: Uses multer for file uploads, images saved to `uploads/` directory, served at `/uploads/` path
+- **Features**: Three tabs — Messages (view, mark read/unread, delete), Portfolio (album management with multi-image upload), and Configuracoes (WhatsApp number)
+- **Portfolio Upload**: Uses multer for multi-file uploads (up to 6 per album), images saved to `uploads/` directory, served at `/uploads/` path
+- **Settings**: `site_settings` table stores key-value pairs (e.g., `whatsapp_number`)
 - **Footer link**: Small "Admin" link in the site footer
 
 ### Portfolio
-- **Route**: `/portfolio` — public portfolio page showing uploaded project photos
-- **Data**: Fetched from `portfolio_items` table via `/api/portfolio` endpoint
-- **Admin management**: Upload, edit, delete photos from admin dashboard Portfolio tab
+- **Route**: `/portfolio` — public portfolio page showing uploaded project albums
+- **Data**: `portfolio_items` (album container) + `portfolio_images` (individual photos per album), fetched via `/api/portfolio`
+- **Lightbox**: Clicking an album opens a fullscreen lightbox with left/right arrow navigation and dot indicators
+- **Admin management**: Create albums with up to 6 photos, add/remove individual images, edit title/category, delete albums
+
+### WhatsApp Floating Button
+- **Component**: `client/src/components/whatsapp-button.tsx` — rendered globally in App.tsx
+- **Behavior**: Fixed bottom-right, links to `wa.me/{number}`, only visible when WhatsApp number is configured in admin settings
+- **Data**: Fetches from `/api/settings/whatsapp` public endpoint
 
 ## User Preferences
 
